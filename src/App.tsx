@@ -20,14 +20,19 @@ export function App() {
   const dashboardRef = useRef<HTMLDivElement | null>(null);
 
   const {
+    dataSource,
+    setDataSource,
     telemetry,
     history,
     status,
     statusDetails,
     logs,
     esp32Url,
+    supabaseUrl,
+    supabaseKey,
     isDemoMode,
     updateBaseUrl,
+    saveSupabaseConfig,
     toggleDemoMode,
     clearLogs,
   } = useSensorData();
@@ -54,14 +59,16 @@ export function App() {
                   Performance Monitoring
                 </h1>
                 <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-2">
-                  <span className="text-cyan-400 font-mono font-medium">ESP32 Wi-Fi Telemetry</span>
+                  <span className="text-cyan-400 font-mono font-medium">
+                    {dataSource === 'SUPABASE' ? 'Supabase Realtime Stream' : 'ESP32 Wi-Fi HTTP API'}
+                  </span>
                   <span>•</span>
                   <span>Real Hardware Sensors + Isolated Simulated V/A</span>
                 </p>
               </div>
             </div>
 
-            {/* Live Connection Status & Controls */}
+            {/* Live Connection Status & Controls with Supabase Switcher */}
             <ConnectionStatus
               status={status}
               statusDetails={statusDetails}
@@ -70,6 +77,11 @@ export function App() {
               isDemoMode={isDemoMode}
               onToggleDemoMode={toggleDemoMode}
               lastUpdateTimestamp={telemetry?.timestamp}
+              dataSource={dataSource}
+              onToggleDataSource={setDataSource}
+              supabaseUrl={supabaseUrl}
+              supabaseKey={supabaseKey}
+              onSaveSupabaseConfig={saveSupabaseConfig}
             />
           </div>
         </header>
@@ -146,7 +158,9 @@ export function App() {
             <span>Design and Development of IoT-Based Two-Wheeler Electric Vehicle Prototype</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-cyan-400">ESP32 REST HTTP API</span>
+            <span className="text-cyan-400">
+              {dataSource === 'SUPABASE' ? 'Supabase Realtime Cloud' : 'ESP32 Wi-Fi HTTP API'}
+            </span>
             <span>•</span>
             <span>Vite + React + TS</span>
             <span>•</span>
