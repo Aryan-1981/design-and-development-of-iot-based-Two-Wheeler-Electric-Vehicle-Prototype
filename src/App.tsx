@@ -12,6 +12,7 @@ import { ElectricalMeters } from './components/ElectricalMeters';
 import { LogsTab } from './pages/LogsTab';
 import { AboutProjectPage } from './pages/AboutProjectPage';
 import { CustomCursor } from './components/CustomCursor';
+import { MitsLogo } from './components/MitsLogo';
 import { useSensorData } from './hooks/useSensorData';
 import { Cpu } from 'lucide-react';
 
@@ -50,23 +51,27 @@ export function App() {
         {/* Dashboard Header */}
         <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-slate-200/80 px-4 lg:px-8 py-3.5 shadow-sm">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 max-w-7xl mx-auto w-full">
-            {/* Title & Branding */}
-            <div className="flex items-center gap-3">
-              <div className="relative p-2.5 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 shadow-sm">
-                <Cpu className="w-5 h-5 animate-pulse" />
-                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-indigo-600 ring-2 ring-white" />
-              </div>
-              <div>
-                <h1 className="text-sm sm:text-base lg:text-lg font-extrabold text-slate-900 tracking-tight leading-tight">
-                  IoT-Based Performance Monitoring of Two-Wheeler Electric Vehicles
-                </h1>
-                <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2 font-medium">
-                  <span className="text-indigo-700 font-mono font-semibold bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
-                    {dataSource === 'SUPABASE' ? 'Supabase Realtime Stream' : 'ESP32 Wi-Fi HTTP API'}
-                  </span>
-                  <span>•</span>
-                  <span>Live Physical Sensors + Isolated Simulated V/A</span>
-                </p>
+            {/* Title & Branding — crest centered directly above the main title */}
+            <div className="flex flex-col items-center gap-3 w-full lg:w-auto">
+              <MitsLogo />
+
+              <div className="flex items-center gap-3">
+                <div className="relative p-2.5 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 shadow-sm">
+                  <Cpu className="w-5 h-5 animate-pulse" />
+                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-indigo-600 ring-2 ring-white" />
+                </div>
+                <div>
+                  <h1 className="text-sm sm:text-base lg:text-lg font-extrabold text-slate-900 tracking-tight leading-tight">
+                    IoT-Based Performance Monitoring of Two-Wheeler Electric Vehicles
+                  </h1>
+                  <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2 font-medium">
+                    <span className="text-indigo-700 font-mono font-semibold bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
+                      {dataSource === 'SUPABASE' ? 'Supabase Realtime Stream' : 'ESP32 Wi-Fi HTTP API'}
+                    </span>
+                    <span>•</span>
+                    <span>Live Physical Sensors + Isolated Simulated V/A</span>
+                  </p>
+                </div>
               </div>
             </div>
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { ChevronDown, ArrowDown, Cpu, Gauge, Zap, AlertTriangle, Layers } from 'lucide-react';
+import { MitsLogo } from './MitsLogo';
 
 interface ScrollAnimationProps {
   onEnterDashboard?: () => void;
@@ -213,6 +214,9 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({ onEnterDashboa
             <span className="text-cyan-600">|</span>
             <span className="text-slate-400">ESP32 2.4GHz Wi-Fi / RTOS</span>
           </div>
+
+          {/* MITS Institutional Crest — high-impact branding centerpiece */}
+          <MitsLogo variant="hero" className="mb-6 lg:mb-8" />
 
           {/* Full Mandatory Title */}
           <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-cyan-300 tracking-tight leading-tight drop-shadow-lg">
