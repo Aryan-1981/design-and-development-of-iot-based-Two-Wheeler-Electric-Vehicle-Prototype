@@ -7,8 +7,10 @@ import { TemperatureHumidityChart } from './components/TemperatureHumidityChart'
 import { MpuTempChart } from './components/MpuTempChart';
 import { AccelerometerChart } from './components/AccelerometerChart';
 import { GyroscopeChart } from './components/GyroscopeChart';
+import { RpmGaugePanel } from './components/RpmGaugePanel';
 import { RpmChart } from './components/RpmChart';
 import { RpmSampleTable } from './components/RpmSampleTable';
+import { ServoDialPanel } from './components/ServoDialPanel';
 import { ServoAngleChart } from './components/ServoAngleChart';
 import { ServoSampleTable } from './components/ServoSampleTable';
 import { ElectricalMeters } from './components/ElectricalMeters';
@@ -137,13 +139,15 @@ export function App() {
 
           {activeSection === 'rpm' && (
             <div className="space-y-5 sm:space-y-6">
-              <RpmChart history={history} maxRpmSession={telemetry?.maxRpmSession ?? 0} />
+              <RpmGaugePanel history={history} maxRpmSession={telemetry?.maxRpmSession ?? 0} />
+              <RpmChart history={history} />
               <RpmSampleTable history={history} />
             </div>
           )}
 
           {activeSection === 'servo' && (
             <div className="space-y-5 sm:space-y-6">
+              <ServoDialPanel history={history} />
               <ServoAngleChart history={history} />
               <ServoSampleTable history={history} />
             </div>

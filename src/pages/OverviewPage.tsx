@@ -5,7 +5,9 @@ import { TemperatureHumidityChart } from '../components/TemperatureHumidityChart
 import { AccelerometerChart } from '../components/AccelerometerChart';
 import { GyroscopeChart } from '../components/GyroscopeChart';
 import { MpuTempChart } from '../components/MpuTempChart';
+import { RpmGaugePanel } from '../components/RpmGaugePanel';
 import { RpmChart } from '../components/RpmChart';
+import { ServoDialPanel } from '../components/ServoDialPanel';
 import { ServoAngleChart } from '../components/ServoAngleChart';
 import { ElectricalMeters } from '../components/ElectricalMeters';
 import { SystemStatusStrip } from '../components/SystemStatusStrip';
@@ -149,19 +151,25 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
       {/* 3. Electrical measurements — always labelled simulated */}
       <ElectricalMeters electrical={electrical} />
 
-      {/* 4. RPM & servo performance */}
+      {/* 4. RPM & servo gauges */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
-        <RpmChart history={history} maxRpmSession={telemetry?.maxRpmSession ?? 0} />
+        <RpmGaugePanel history={history} maxRpmSession={telemetry?.maxRpmSession ?? 0} />
+        <ServoDialPanel history={history} />
+      </div>
+
+      {/* 5. RPM & servo trend graphs — under the telemetry cards above */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+        <RpmChart history={history} />
         <ServoAngleChart history={history} />
       </div>
 
-      {/* 5. Temperature trends */}
+      {/* 6. Temperature trends */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
         <TemperatureHumidityChart history={history} />
         <MpuTempChart history={history} />
       </div>
 
-      {/* 6. Motion trends */}
+      {/* 7. Motion trends */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
         <AccelerometerChart history={history} />
         <GyroscopeChart history={history} />
