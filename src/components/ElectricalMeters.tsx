@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, Zap, Activity, BatteryCharging } from 'lucide-react';
+import { Zap, Activity, BatteryCharging } from 'lucide-react';
 import { SimulatedElectricalValues } from '../types/sensors';
 
 interface ElectricalMetersProps {
@@ -27,23 +27,6 @@ export const ElectricalMeters: React.FC<ElectricalMetersProps> = ({ electrical }
 
   return (
     <section className="space-y-4" aria-label="Simulated electrical monitoring">
-      {/* Mandatory simulated-data disclaimer */}
-      <div
-        className="rounded-card border border-amber-300/80 bg-amber-50/80 p-3.5 flex items-start gap-3 text-xs leading-relaxed text-amber-900"
-        role="note"
-      >
-        <span className="ev-chip ev-chip-warn shrink-0 mt-0.5">
-          <AlertTriangle className="w-3 h-3" aria-hidden="true" />
-          Simulated
-        </span>
-        <p>
-          <span className="font-bold uppercase tracking-wide">Simulated electrical values.</span>{' '}
-          No voltage or current sensor is connected to the prototype. These channels are modelled
-          from motor activity to demonstrate battery-load behaviour — they are{' '}
-          <span className="font-semibold">not hardware measurements</span>.
-        </p>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         {/* Voltmeter */}
         <MeterCard
