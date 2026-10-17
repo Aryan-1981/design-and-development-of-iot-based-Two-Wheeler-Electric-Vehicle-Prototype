@@ -29,69 +29,70 @@ export const SensorCard: React.FC<SensorCardProps> = ({
 }) => {
   const colorMap = {
     cyan: {
-      text: 'text-cyan-400',
-      border: 'hover:border-cyan-500/40',
-      bgGlow: 'group-hover:bg-cyan-500/5',
-      iconBg: 'bg-cyan-950/60 border-cyan-500/30 text-cyan-400',
+      text: 'text-sky-600',
+      border: 'hover:border-sky-300',
+      iconBg: 'bg-sky-50 border-sky-200 text-sky-600',
+      glow: 'group-hover:bg-sky-50/30',
     },
     emerald: {
-      text: 'text-emerald-400',
-      border: 'hover:border-emerald-500/40',
-      bgGlow: 'group-hover:bg-emerald-500/5',
-      iconBg: 'bg-emerald-950/60 border-emerald-500/30 text-emerald-400',
+      text: 'text-emerald-600',
+      border: 'hover:border-emerald-300',
+      iconBg: 'bg-emerald-50 border-emerald-200 text-emerald-600',
+      glow: 'group-hover:bg-emerald-50/30',
     },
     amber: {
-      text: 'text-amber-400',
-      border: 'hover:border-amber-500/40',
-      bgGlow: 'group-hover:bg-amber-500/5',
-      iconBg: 'bg-amber-950/60 border-amber-500/30 text-amber-400',
+      text: 'text-amber-600',
+      border: 'hover:border-amber-300',
+      iconBg: 'bg-amber-50 border-amber-200 text-amber-600',
+      glow: 'group-hover:bg-amber-50/30',
     },
     rose: {
-      text: 'text-rose-400',
-      border: 'hover:border-rose-500/40',
-      bgGlow: 'group-hover:bg-rose-500/5',
-      iconBg: 'bg-rose-950/60 border-rose-500/30 text-rose-400',
+      text: 'text-rose-600',
+      border: 'hover:border-rose-300',
+      iconBg: 'bg-rose-50 border-rose-200 text-rose-600',
+      glow: 'group-hover:bg-rose-50/30',
     },
     blue: {
-      text: 'text-blue-400',
-      border: 'hover:border-blue-500/40',
-      bgGlow: 'group-hover:bg-blue-500/5',
-      iconBg: 'bg-blue-950/60 border-blue-500/30 text-blue-400',
+      text: 'text-blue-600',
+      border: 'hover:border-blue-300',
+      iconBg: 'bg-blue-50 border-blue-200 text-blue-600',
+      glow: 'group-hover:bg-blue-50/30',
     },
     purple: {
-      text: 'text-purple-400',
-      border: 'hover:border-purple-500/40',
-      bgGlow: 'group-hover:bg-purple-500/5',
-      iconBg: 'bg-purple-950/60 border-purple-500/30 text-purple-400',
+      text: 'text-indigo-600',
+      border: 'hover:border-indigo-300',
+      iconBg: 'bg-indigo-50 border-indigo-200 text-indigo-600',
+      glow: 'group-hover:bg-indigo-50/30',
     },
   };
 
   const statusBadge = {
-    normal: 'bg-emerald-950/60 border-emerald-500/30 text-emerald-300',
-    warning: 'bg-amber-950/60 border-amber-500/30 text-amber-300',
-    error: 'bg-rose-950/60 border-rose-500/30 text-rose-300',
-    offline: 'bg-slate-800/80 border-slate-700 text-slate-400',
+    normal: 'bg-emerald-50 border-emerald-200 text-emerald-700',
+    warning: 'bg-amber-50 border-amber-200 text-amber-700',
+    error: 'bg-rose-50 border-rose-200 text-rose-700',
+    offline: 'bg-slate-100 border-slate-200 text-slate-500',
   }[status];
 
   const currentTheme = colorMap[accentColor];
 
   return (
     <div
-      className={`group relative rounded-2xl glass-panel p-5 transition-all duration-300 ${currentTheme.border} ${currentTheme.bgGlow}`}
+      data-cursor="INSPECT"
+      className={`group relative rounded-2xl glass-panel glass-panel-hover p-5 transition-all duration-300 ${currentTheme.border} ${currentTheme.glow}`}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <div
-            className={`p-2.5 rounded-xl border ${currentTheme.iconBg} transition-transform duration-300 group-hover:scale-105`}
+            className={`p-2.5 rounded-xl border ${currentTheme.iconBg} transition-transform duration-300 group-hover:scale-105 shadow-sm`}
           >
             <Icon className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-xs font-medium uppercase tracking-wider text-slate-400 font-mono">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">
               {title}
             </h3>
             {badge && (
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 mt-1 inline-block">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200 mt-1 inline-block font-medium">
                 {badge}
               </span>
             )}
@@ -99,21 +100,21 @@ export const SensorCard: React.FC<SensorCardProps> = ({
         </div>
 
         {/* Status indicator pill */}
-        <div className={`px-2 py-0.5 rounded-full border text-[11px] font-mono font-medium ${statusBadge}`}>
+        <div className={`px-2.5 py-0.5 rounded-full border text-[11px] font-mono font-semibold ${statusBadge}`}>
           {statusLabel || status.toUpperCase()}
         </div>
       </div>
 
       <div className="mt-4 flex items-baseline gap-2">
-        <span className="text-3xl font-extrabold tracking-tight font-mono text-white">
+        <span className="text-3xl font-extrabold tracking-tight font-mono text-slate-900">
           {value}
         </span>
-        {unit && <span className="text-sm font-semibold text-slate-400 font-mono">{unit}</span>}
+        {unit && <span className="text-sm font-semibold text-slate-500 font-mono">{unit}</span>}
       </div>
 
-      {subtitle && <p className="mt-1 text-xs text-slate-400 font-sans">{subtitle}</p>}
+      {subtitle && <p className="mt-1 text-xs text-slate-500 font-sans">{subtitle}</p>}
 
-      {children && <div className="mt-4 pt-3 border-t border-slate-800/60">{children}</div>}
+      {children && <div className="mt-4 pt-3 border-t border-slate-100">{children}</div>}
     </div>
   );
 };

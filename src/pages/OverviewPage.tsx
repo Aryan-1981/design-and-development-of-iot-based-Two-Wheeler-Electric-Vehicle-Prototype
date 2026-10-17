@@ -5,19 +5,12 @@ import { TemperatureHumidityChart } from '../components/TemperatureHumidityChart
 import { AccelerometerChart } from '../components/AccelerometerChart';
 import { GyroscopeChart } from '../components/GyroscopeChart';
 import { MpuTempChart } from '../components/MpuTempChart';
-import { RpmChart } from '../components/RpmChart';
-import { ServoAngleChart } from '../components/ServoAngleChart';
 import { ElectricalMeters } from '../components/ElectricalMeters';
 import {
   Thermometer,
   Gauge,
   Cpu,
   Compass,
-  Activity,
-  Zap,
-  CheckCircle,
-  AlertTriangle,
-  RotateCw,
 } from 'lucide-react';
 
 interface OverviewPageProps {
@@ -45,13 +38,13 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ telemetry, history }
     <div className="space-y-6">
       {/* Top Telemetry KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Ambient Temperature & Humidity (DHT11) */}
+        {/* Card 1: Ambient Temperature (DHT11) - Humidity completely removed */}
         <SensorCard
-          title="Ambient Temp & Humidity"
+          title="Ambient Temperature"
           value={isDhtValid && dht.temperature_c !== null ? `${dht.temperature_c}°C` : '--'}
           subtitle={
-            isDhtValid && dht.humidity_percent !== null
-              ? `Relative Humidity: ${dht.humidity_percent}%`
+            isDhtValid && dht.temperature_c !== null
+              ? 'DHT11 Calibrated Ambient Air'
               : 'DHT11 Offline'
           }
           icon={Thermometer}
@@ -59,9 +52,9 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ telemetry, history }
           accentColor="emerald"
           badge="GPIO 4 (DHT11)"
         >
-          <div className="flex justify-between items-center text-xs font-mono text-slate-400">
+          <div className="flex justify-between items-center text-xs font-mono text-slate-500">
             <span>Sensor Status:</span>
-            <span className={isDhtValid ? 'text-emerald-400' : 'text-slate-500'}>
+            <span className={isDhtValid ? 'text-emerald-600 font-bold' : 'text-slate-400'}>
               {isDhtValid ? 'REAL READING' : 'UNAVAILABLE'}
             </span>
           </div>
@@ -78,9 +71,9 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ telemetry, history }
           accentColor="cyan"
           badge="GPIO 5 (NPN)"
         >
-          <div className="flex justify-between items-center text-xs font-mono text-slate-400">
+          <div className="flex justify-between items-center text-xs font-mono text-slate-500">
             <span>Cumulative Pulses:</span>
-            <span className="text-cyan-300 font-bold">{rpm?.pulse_count ?? 0}</span>
+            <span className="text-sky-600 font-bold">{rpm?.pulse_count ?? 0}</span>
           </div>
         </SensorCard>
 
@@ -94,9 +87,9 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ telemetry, history }
           accentColor="purple"
           badge="I2C 0x68"
         >
-          <div className="flex justify-between items-center text-xs font-mono text-slate-400">
+          <div className="flex justify-between items-center text-xs font-mono text-slate-500">
             <span>Distinct from DHT11:</span>
-            <span className={isMpuValid ? 'text-purple-400' : 'text-slate-500'}>
+            <span className={isMpuValid ? 'text-indigo-600 font-bold' : 'text-slate-400'}>
               {isMpuValid ? 'CALIBRATED' : 'UNAVAILABLE'}
             </span>
           </div>
@@ -113,9 +106,9 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ telemetry, history }
           accentColor="amber"
           badge="GPIO 18"
         >
-          <div className="flex justify-between items-center text-xs font-mono text-slate-400">
+          <div className="flex justify-between items-center text-xs font-mono text-slate-500">
             <span>10-Min Sequence:</span>
-            <span className="text-amber-400">
+            <span className="text-amber-600 font-bold">
               {servo?.test_active ? 'IN PROGRESS' : 'READY / COMPLETED'}
             </span>
           </div>

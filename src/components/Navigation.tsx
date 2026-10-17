@@ -41,7 +41,7 @@ export const Navigation: React.FC<NavigationProps> = ({
     { id: 'live-sensors', label: 'Live Sensors', icon: Activity },
     { id: 'motor-rpm', label: 'Motor & RPM', icon: Gauge },
     { id: 'vibration', label: 'Vibration Analysis', icon: Vibrate },
-    { id: 'temp-humidity', label: 'Temperature & Humidity', icon: ThermometerSnowflake },
+    { id: 'temp-humidity', label: 'Temperature', icon: ThermometerSnowflake },
     { id: 'logs', label: 'System Logs', icon: Terminal, badge: unreadLogsCount },
     { id: 'about', label: 'About Project', icon: Info },
   ];

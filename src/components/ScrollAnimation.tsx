@@ -250,6 +250,7 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({ onEnterDashboa
           <div className="mt-10 flex flex-col items-center gap-3">
             <button
               onClick={scrollToDashboard}
+              data-cursor="EXPLORE"
               className="group relative inline-flex items-center gap-3 px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-sm sm:text-base shadow-glow-cyan hover:shadow-cyan-400/50 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
             >
               <span>Explore Telemetry Dashboard</span>

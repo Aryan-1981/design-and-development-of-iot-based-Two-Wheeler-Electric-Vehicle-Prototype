@@ -6,12 +6,12 @@ import { OverviewPage } from './pages/OverviewPage';
 import { TemperatureHumidityChart } from './components/TemperatureHumidityChart';
 import { AccelerometerChart } from './components/AccelerometerChart';
 import { GyroscopeChart } from './components/GyroscopeChart';
-import { MpuTempChart } from './components/MpuTempChart';
 import { RpmChart } from './components/RpmChart';
 import { ServoAngleChart } from './components/ServoAngleChart';
 import { ElectricalMeters } from './components/ElectricalMeters';
 import { LogsTab } from './pages/LogsTab';
 import { AboutProjectPage } from './pages/AboutProjectPage';
+import { CustomCursor } from './components/CustomCursor';
 import { useSensorData } from './hooks/useSensorData';
 import { Cpu } from 'lucide-react';
 
@@ -38,32 +38,35 @@ export function App() {
   } = useSensorData();
 
   return (
-    <div className="min-h-screen bg-[#080d1a] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
-      {/* 1. Cinematic Scroll-Controlled Opening Animation Section */}
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans selection:bg-indigo-500/20 selection:text-indigo-900 bg-mesh-light">
+      {/* Interactive Glassmorphism Spring Physics Custom Cursor */}
+      <CustomCursor />
+
+      {/* 1. Cinematic Scroll-Controlled Opening Animation Section (Preserved Completely) */}
       <ScrollAnimation />
 
-      {/* 2. Main IoT Performance Monitoring Dashboard */}
+      {/* 2. Main IoT Performance Monitoring Dashboard (Devnio Light Glassmorphism Architecture) */}
       <div id="dashboard" ref={dashboardRef} className="relative z-30 flex-1 flex flex-col">
         {/* Dashboard Header */}
-        <header className="sticky top-0 z-40 bg-[#080d1a]/95 backdrop-blur-xl border-b border-slate-800/80 px-4 lg:px-8 py-3.5">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-slate-200/80 px-4 lg:px-8 py-3.5 shadow-sm">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 max-w-7xl mx-auto w-full">
             {/* Title & Branding */}
             <div className="flex items-center gap-3">
-              <div className="relative p-2.5 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/30 text-cyan-400 shadow-glow-cyan/20">
+              <div className="relative p-2.5 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 shadow-sm">
                 <Cpu className="w-5 h-5 animate-pulse" />
-                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-cyan-400 ring-2 ring-[#080d1a]" />
+                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-indigo-600 ring-2 ring-white" />
               </div>
               <div>
-                <h1 className="text-sm sm:text-base lg:text-lg font-bold text-white tracking-tight leading-tight">
+                <h1 className="text-sm sm:text-base lg:text-lg font-extrabold text-slate-900 tracking-tight leading-tight">
                   Design and Development of IoT-Based Two-Wheeler Electric Vehicle Prototype for
                   Performance Monitoring
                 </h1>
-                <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-2">
-                  <span className="text-cyan-400 font-mono font-medium">
+                <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2 font-medium">
+                  <span className="text-indigo-700 font-mono font-semibold bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
                     {dataSource === 'SUPABASE' ? 'Supabase Realtime Stream' : 'ESP32 Wi-Fi HTTP API'}
                   </span>
                   <span>•</span>
-                  <span>Real Hardware Sensors + Isolated Simulated V/A</span>
+                  <span>Live Physical Sensors + Isolated Simulated V/A</span>
                 </p>
               </div>
             </div>
@@ -153,18 +156,18 @@ export function App() {
         </main>
 
         {/* Global Footer */}
-        <footer className="mt-auto border-t border-slate-800/80 bg-[#060a14] py-4 px-4 sm:px-8 text-center text-xs font-mono text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <footer className="mt-auto border-t border-slate-200/80 bg-white/90 backdrop-blur-md py-4 px-4 sm:px-8 text-center text-xs font-mono text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 shadow-sm">
           <div>
             <span>Design and Development of IoT-Based Two-Wheeler Electric Vehicle Prototype</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-cyan-400">
+            <span className="text-indigo-600 font-semibold">
               {dataSource === 'SUPABASE' ? 'Supabase Realtime Cloud' : 'ESP32 Wi-Fi HTTP API'}
             </span>
             <span>•</span>
             <span>Vite + React + TS</span>
             <span>•</span>
-            <span className="text-slate-400">Research & Telemetry Lab</span>
+            <span className="text-slate-600 font-medium">Research & Telemetry Lab</span>
           </div>
         </footer>
       </div>

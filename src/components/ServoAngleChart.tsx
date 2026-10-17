@@ -1,6 +1,6 @@
 import React from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
-import { Compass, Clock, CheckCircle2, RotateCw } from 'lucide-react';
+import { Compass } from 'lucide-react';
 import { UnifiedTelemetry } from '../types/sensors';
 
 interface ServoAngleChartProps {
@@ -25,14 +25,14 @@ export const ServoAngleChart: React.FC<ServoAngleChartProps> = ({ history }) => 
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Actuator Angle Dial */}
-        <div className="glass-panel p-6 rounded-2xl flex flex-col items-center justify-between">
-          <div className="w-full flex items-center justify-between pb-3 border-b border-slate-800">
-            <span className="text-xs font-mono uppercase text-slate-400">Actuator Command</span>
+        <div data-cursor="DIAL" className="glass-panel p-6 rounded-2xl flex flex-col items-center justify-between shadow-sm">
+          <div className="w-full flex items-center justify-between pb-3 border-b border-slate-200/80">
+            <span className="text-xs font-mono uppercase text-slate-500 font-semibold">Actuator Command</span>
             <span
-              className={`px-2 py-0.5 rounded text-[11px] font-mono font-medium ${
+              className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold border ${
                 latest?.test_active
-                  ? 'bg-amber-950/70 text-amber-300 border border-amber-500/30'
-                  : 'bg-emerald-950/70 text-emerald-300 border border-emerald-500/30'
+                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                  : 'bg-emerald-50 text-emerald-700 border-emerald-200'
               }`}
             >
               {latest?.test_active ? '10-MIN TEST ACTIVE' : 'TEST COMPLETE / IDLE'}
@@ -46,7 +46,7 @@ export const ServoAngleChart: React.FC<ServoAngleChartProps> = ({ history }) => 
                 cy="100"
                 r="70"
                 fill="none"
-                stroke="#1e293b"
+                stroke="#e2e8f0"
                 strokeWidth="10"
                 strokeDasharray="220 440"
               />
@@ -55,88 +55,99 @@ export const ServoAngleChart: React.FC<ServoAngleChartProps> = ({ history }) => 
                 cy="100"
                 r="70"
                 fill="none"
-                stroke="#f59e0b"
+                stroke="#d97706"
                 strokeWidth="10"
                 strokeDasharray={`${(logicalAngle / 30) * 220} 440`}
                 className="transition-all duration-300"
-                style={{ filter: 'drop-shadow(0 0 6px #f59e0b88)' }}
+                style={{ filter: 'drop-shadow(0 0 6px rgba(217, 119, 6, 0.3))' }}
               />
             </svg>
             <div
-              className="absolute bottom-2 w-1.5 h-20 bg-amber-400 origin-bottom transition-transform duration-300 rounded shadow-glow-rose"
+              className="absolute bottom-2 w-1.5 h-20 bg-amber-500 origin-bottom transition-transform duration-300 rounded shadow-md"
               style={{ transform: `rotate(${(logicalAngle / 30) * 180 - 90}deg)` }}
             />
-            <div className="absolute bottom-0 w-4 h-4 rounded-full bg-amber-500 ring-4 ring-slate-900" />
+            <div className="absolute bottom-0 w-4 h-4 rounded-full bg-amber-600 ring-4 ring-white shadow-sm" />
           </div>
 
           <div className="w-full text-center">
-            <div className="text-3xl font-extrabold font-mono text-white">
+            <div className="text-3xl font-extrabold font-mono text-slate-900">
               {logicalAngle}°
-              <span className="text-xs text-slate-400 font-sans ml-1">
+              <span className="text-xs text-slate-500 font-sans ml-1 font-semibold">
                 (Output: {outputAngle}°)
               </span>
             </div>
-            <div className="text-[10px] font-mono text-amber-400 mt-0.5">
+            <div className="text-[10px] font-mono text-amber-700 font-semibold mt-0.5">
               Current Stage: {latest?.current_stage || 'RUNNING SEQUENCE'}
             </div>
           </div>
 
-          <div className="w-full grid grid-cols-2 gap-3 text-xs font-mono pt-3 border-t border-slate-800 mt-2">
-            <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-800">
-              <span className="text-slate-400 text-[10px] block">LOGICAL RANGE</span>
-              <span className="text-white font-bold">0° to 30°</span>
+          <div className="w-full grid grid-cols-2 gap-3 text-xs font-mono pt-3 border-t border-slate-200/80 mt-2">
+            <div className="bg-slate-50/80 p-2.5 rounded-xl border border-slate-200/80">
+              <span className="text-slate-400 text-[10px] block font-semibold uppercase">LOGICAL RANGE</span>
+              <span className="text-slate-900 font-bold">0° to 30°</span>
             </div>
-            <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-800">
-              <span className="text-slate-400 text-[10px] block">TIME REMAINING</span>
-              <span className="text-cyan-300 font-bold">{remainingSec}s</span>
+            <div className="bg-slate-50/80 p-2.5 rounded-xl border border-slate-200/80">
+              <span className="text-slate-400 text-[10px] block font-semibold uppercase">TIME REMAINING</span>
+              <span className="text-indigo-600 font-bold">{remainingSec}s</span>
             </div>
           </div>
         </div>
 
         {/* Right: Servo Command Angle History Chart */}
-        <div className="lg:col-span-2 glass-panel p-6 rounded-2xl flex flex-col">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-800 gap-2">
+        <div data-cursor="TELEMETRY" className="lg:col-span-2 glass-panel p-6 rounded-2xl flex flex-col shadow-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-200/80 gap-2">
             <div>
-              <h3 className="font-mono text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                <Compass className="w-5 h-5 text-amber-400" />
+              <h3 className="font-mono text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <Compass className="w-5 h-5 text-amber-600" />
                 Servo Commanded Angle Tracking
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 font-sans mt-0.5">
                 Displays commanded angles executed by the ESP32 (Physical command = 180 - angle)
               </p>
             </div>
-            <div className="text-xs font-mono text-amber-400">
-              Actuator Pin: <span className="text-white font-bold">GPIO 18</span>
+            <div className="text-xs font-mono px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 border border-amber-200 font-semibold">
+              Actuator Pin: <span className="font-bold">GPIO 18</span>
             </div>
           </div>
 
           <div className="w-full h-72 mt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="time" stroke="#64748b" tick={{ fontSize: 10, fill: '#94a3b8' }} />
+              <LineChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                <XAxis
+                  dataKey="time"
+                  stroke="#94a3b8"
+                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  tickLine={false}
+                  axisLine={{ stroke: '#e2e8f0' }}
+                />
                 <YAxis
-                  stroke="#64748b"
+                  stroke="#94a3b8"
                   domain={[0, 35]}
-                  tick={{ fontSize: 10, fill: '#94a3b8' }}
+                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  tickLine={false}
+                  axisLine={{ stroke: '#e2e8f0' }}
                   unit="°"
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#0f172a',
-                    borderColor: '#334155',
-                    borderRadius: '8px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(12px)',
+                    borderColor: 'rgba(226, 232, 240, 0.9)',
+                    borderRadius: '12px',
                     fontSize: '12px',
-                    fontFamily: 'monospace',
+                    fontFamily: 'JetBrains Mono, monospace',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.08)',
+                    color: '#0f172a',
                   }}
                 />
                 <Line
                   type="stepAfter"
                   dataKey="LogicalAngle"
                   name="Logical Angle (°)"
-                  stroke="#f59e0b"
+                  stroke="#d97706"
                   strokeWidth={2.5}
-                  dot={{ r: 2 }}
+                  dot={{ r: 2, fill: '#d97706' }}
                 />
               </LineChart>
             </ResponsiveContainer>

@@ -12,9 +12,9 @@ export const RpmGauge: React.FC<RpmGaugeProps> = ({ rpm, maxRpm = 3000, isRotati
   const angle = (percentage / 100) * 240 - 120;
 
   // Determine color based on threshold
-  let strokeColor = '#06b6d4'; // cyan
-  if (percentage > 70) strokeColor = '#f59e0b'; // amber
-  if (percentage > 88) strokeColor = '#f43f5e'; // rose
+  let strokeColor = '#4f46e5'; // electric indigo
+  if (percentage > 70) strokeColor = '#d97706'; // warm amber
+  if (percentage > 88) strokeColor = '#e11d48'; // vibrant rose
 
   const radius = 80;
   const circumference = 2 * Math.PI * radius;
@@ -32,7 +32,7 @@ export const RpmGauge: React.FC<RpmGaugeProps> = ({ rpm, maxRpm = 3000, isRotati
             cy="100"
             r={radius}
             fill="none"
-            stroke="#1e293b"
+            stroke="#e2e8f0"
             strokeWidth="12"
             strokeDasharray={`${arcLength} ${circumference}`}
             strokeLinecap="round"
@@ -50,37 +50,37 @@ export const RpmGauge: React.FC<RpmGaugeProps> = ({ rpm, maxRpm = 3000, isRotati
             strokeLinecap="round"
             className="transition-all duration-300 ease-out"
             style={{
-              filter: `drop-shadow(0 0 8px ${strokeColor}88)`,
+              filter: `drop-shadow(0 0 6px ${strokeColor}44)`,
             }}
           />
         </svg>
 
         {/* Center Display */}
         <div className="absolute inset-0 flex flex-col items-center justify-center mt-3">
-          <div className="text-3xl font-extrabold font-mono tracking-tight text-white flex items-baseline">
+          <div className="text-3xl font-extrabold font-mono tracking-tight text-slate-900 flex items-baseline">
             {rpm}
-            <span className="text-xs text-slate-400 font-sans ml-1">RPM</span>
+            <span className="text-xs text-slate-500 font-sans ml-1 font-semibold">RPM</span>
           </div>
 
           <div className="mt-1 flex items-center gap-1.5">
             <span
               className={`w-2 h-2 rounded-full ${
-                isRotating ? 'bg-emerald-400 animate-ping' : 'bg-slate-600'
+                isRotating ? 'bg-emerald-500 animate-ping' : 'bg-slate-300'
               }`}
             />
-            <span className="text-[11px] font-mono text-slate-400">
+            <span className="text-[11px] font-mono font-medium text-slate-600">
               {isRotating ? 'MOTOR SPINNING' : 'STANDSTILL'}
             </span>
           </div>
 
-          <div className="text-[10px] font-mono text-slate-400 mt-1">
+          <div className="text-[10px] font-mono text-slate-400 mt-1 font-medium">
             PEAK SCALE: {maxRpm} RPM
           </div>
         </div>
       </div>
 
       {/* Scale tick labels */}
-      <div className="w-full flex justify-between px-6 text-[10px] font-mono text-slate-400 -mt-2">
+      <div className="w-full flex justify-between px-6 text-[10px] font-mono text-slate-400 -mt-2 font-medium">
         <span>0</span>
         <span>{Math.round(maxRpm * 0.25)}</span>
         <span>{Math.round(maxRpm * 0.5)}</span>
