@@ -31,7 +31,7 @@ export interface Mpu6050Reading {
 }
 
 export interface ServoReading {
-  commanded_angle_deg: number; // 0-30° logical test angle
+  commanded_angle_deg: number; // 0-60° logical test angle
   output_angle_deg: number;    // 180 - logicalAngle physical command
   test_active: boolean;
   current_stage?: string;

@@ -266,12 +266,12 @@ export class Esp32SensorProvider {
         valid: true,
       },
       servo: {
-        commanded_angle_deg: [20, 22, 28, 20, 15, 30, 28, 26, 15, 30, 0][
+        commanded_angle_deg: [40, 44, 56, 40, 30, 60, 56, 52, 30, 60, 0][
           Math.floor((this.demoTick / 10) % 11)
         ],
         output_angle_deg:
           180 -
-          [20, 22, 28, 20, 15, 30, 28, 26, 15, 30, 0][
+          [40, 44, 56, 40, 30, 60, 56, 52, 30, 60, 0][
             Math.floor((this.demoTick / 10) % 11)
           ],
         test_active: true,

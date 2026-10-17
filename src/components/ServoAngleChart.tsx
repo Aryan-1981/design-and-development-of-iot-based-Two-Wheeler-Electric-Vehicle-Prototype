@@ -9,6 +9,9 @@ interface ServoAngleChartProps {
   history: UnifiedTelemetry[];
 }
 
+/** Logical test range of the actuator sequence (degrees). */
+const SERVO_MAX_DEG = 60;
+
 export const ServoAngleChart: React.FC<ServoAngleChartProps> = ({ history }) => {
   const chartData = history.map((item) => ({
     time: item.timestamp,
@@ -17,7 +20,7 @@ export const ServoAngleChart: React.FC<ServoAngleChartProps> = ({ history }) => 
   }));
 
   const latest = history[history.length - 1]?.servo;
-  const logicalAngle = latest?.commanded_angle_deg ?? 0;
+  const logicalAngle = Math.min(latest?.commanded_angle_deg ?? 0, SERVO_MAX_DEG);
   const outputAngle = latest?.output_angle_deg ?? 180;
   const remainingSec = latest?.remaining_duration_ms
     ? Math.round(latest.remaining_duration_ms / 1000)
@@ -29,7 +32,7 @@ export const ServoAngleChart: React.FC<ServoAngleChartProps> = ({ history }) => 
       icon={SlidersHorizontal}
       accent="warn"
       title="Servo Commanded Angle"
-      subtitle="Actuator on GPIO 18 — logical test angle 0–30°; physical command = 180 − angle"
+      subtitle="Actuator on GPIO 18 — logical test angle 0–60°; physical command = 180 − angle"
       chartHeight="h-52"
       actions={
         <span className={`ev-chip ${latest?.test_active ? 'ev-chip-warn' : 'ev-chip-ok'}`}>
@@ -59,14 +62,14 @@ export const ServoAngleChart: React.FC<ServoAngleChartProps> = ({ history }) => 
               fill="none"
               stroke="#D97706"
               strokeWidth="10"
-              strokeDasharray={`${(logicalAngle / 30) * 220} 440`}
+              strokeDasharray={`${(logicalAngle / SERVO_MAX_DEG) * 220} 440`}
               className="transition-all duration-300"
               style={{ filter: 'drop-shadow(0 0 6px rgba(217,119,6,0.35))' }}
             />
           </svg>
           <div
             className="absolute bottom-2 w-1.5 h-20 bg-amber-500 origin-bottom transition-transform duration-300 rounded shadow-md"
-            style={{ transform: `rotate(${(logicalAngle / 30) * 180 - 90}deg)` }}
+            style={{ transform: `rotate(${(logicalAngle / SERVO_MAX_DEG) * 180 - 90}deg)` }}
           />
           <div className="absolute bottom-0 w-4 h-4 rounded-full bg-amber-600 ring-4 ring-white shadow-sm" />
         </div>
@@ -86,7 +89,7 @@ export const ServoAngleChart: React.FC<ServoAngleChartProps> = ({ history }) => 
         <div className="flex flex-wrap justify-center gap-3 mt-3 text-xs">
           <div className="ev-panel-muted px-4 py-2 text-center">
             <span className="ev-eyebrow block">Logical Range</span>
-            <span className="ev-metric text-sm font-bold text-slate-900 block mt-0.5">0°–30°</span>
+            <span className="ev-metric text-sm font-bold text-slate-900 block mt-0.5">0°–{SERVO_MAX_DEG}°</span>
           </div>
           <div className="ev-panel-muted px-4 py-2 text-center">
             <span className="ev-eyebrow block">Time Remaining</span>
@@ -103,7 +106,7 @@ export const ServoAngleChart: React.FC<ServoAngleChartProps> = ({ history }) => 
           <LineChart data={chartData} margin={{ top: 6, right: 10, left: -10, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
             <XAxis dataKey="time" {...CHART_AXIS_PROPS} />
-            <YAxis {...CHART_AXIS_PROPS} domain={[0, 35]} unit="°" width={44} />
+            <YAxis {...CHART_AXIS_PROPS} domain={[0, SERVO_MAX_DEG + 5]} unit="°" width={44} />
             <Tooltip
               contentStyle={CHART_TOOLTIP_STYLE}
               formatter={(val) => [`${val}°`, 'Commanded Angle']}

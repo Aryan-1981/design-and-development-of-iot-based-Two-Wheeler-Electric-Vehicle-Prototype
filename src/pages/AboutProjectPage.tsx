@@ -129,7 +129,7 @@ export const AboutProjectPage: React.FC = () => {
                 <td className="py-3 text-amber-700 font-bold">Servo Actuator</td>
                 <td className="py-3 text-slate-900 font-bold">GPIO 18</td>
                 <td className="py-3">PWM 50 Hz (500–2500 µs)</td>
-                <td className="py-3">Logical 0–30° (output = 180 − angle) · 10-min test</td>
+                <td className="py-3">Logical 0–60° (output = 180 − angle) · 10-min test</td>
               </tr>
             </tbody>
           </table>
