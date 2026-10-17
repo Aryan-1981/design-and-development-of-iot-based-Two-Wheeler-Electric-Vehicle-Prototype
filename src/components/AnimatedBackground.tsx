@@ -42,11 +42,11 @@ export const AnimatedBackground: React.FC = () => {
         style={{
           backgroundImage: `
             radial-gradient(at 15% 20%, rgba(14, 165, 233, 0.06) 0px, transparent 45%),
-            radial-gradient(at 80% 85%, rgba(79, 70, 229, 0.05) 0px, transparent 45%),
-            radial-gradient(at 40% 40%, rgba(234, 179, 8, 0.03) 0px, transparent 45%),
-            radial-gradient(at 90% 10%, rgba(168, 85, 247, 0.04) 0px, transparent 40%)
+            radial-gradient(at 80% 85%, rgba(37, 99, 235, 0.05) 0px, transparent 45%),
+            radial-gradient(at 40% 40%, rgba(14, 165, 233, 0.035) 0px, transparent 45%),
+            radial-gradient(at 90% 10%, rgba(2, 132, 199, 0.045) 0px, transparent 40%)
           `,
-          backgroundColor: '#F8FAFC',
+          backgroundColor: '#F3F6FB',
           ...(motionDisabled
             ? {}
             : {
@@ -81,13 +81,13 @@ export const AnimatedBackground: React.FC = () => {
 
         {/* Vertical traces */}
         <line x1="120" y1="0" x2="120" y2="100%" stroke="#0ea5e9" strokeOpacity="0.15" strokeWidth="0.6" />
-        <line x1="320" y1="0" x2="320" y2="100%" stroke="#8b5cf6" strokeOpacity="0.12" strokeWidth="0.6" />
+        <line x1="320" y1="0" x2="320" y2="100%" stroke="#2563eb" strokeOpacity="0.12" strokeWidth="0.6" />
         <line x1="520" y1="0" x2="520" y2="100%" stroke="#0ea5e9" strokeOpacity="0.15" strokeWidth="0.6" />
-        <line x1="720" y1="0" x2="720" y2="100%" stroke="#8b5cf6" strokeOpacity="0.12" strokeWidth="0.6" />
+        <line x1="720" y1="0" x2="720" y2="100%" stroke="#2563eb" strokeOpacity="0.12" strokeWidth="0.6" />
 
         {/* Horizontal traces */}
         <line x1="0" y1="140" x2="100%" y2="140" stroke="#0ea5e9" strokeOpacity="0.15" strokeWidth="0.6" />
-        <line x1="0" y1="300" x2="100%" y2="300" stroke="#8b5cf6" strokeOpacity="0.12" strokeWidth="0.6" />
+        <line x1="0" y1="300" x2="100%" y2="300" stroke="#2563eb" strokeOpacity="0.12" strokeWidth="0.6" />
         <line x1="0" y1="460" x2="100%" y2="460" stroke="#0ea5e9" strokeOpacity="0.15" strokeWidth="0.6" />
 
         {/* Intersection nodes */}
@@ -124,7 +124,7 @@ export const AnimatedBackground: React.FC = () => {
           cx={320}
           cy={300}
           r={2}
-          fill="#a78bfa"
+          fill="#3b82f6"
           filter="url(#glow)"
           animate={{
             cx: [320, 720, 320],
@@ -181,7 +181,7 @@ export const AnimatedBackground: React.FC = () => {
         <div
           className="absolute -bottom-8 -right-8 w-[700px] h-[100px] rounded-full"
           style={{
-            background: `linear-gradient(270deg, transparent, rgba(79, 70, 229, 0.07), transparent)`,
+            background: `linear-gradient(270deg, transparent, rgba(37, 99, 235, 0.07), transparent)`,
             ...(motionDisabled
               ? {}
               : {
@@ -194,7 +194,7 @@ export const AnimatedBackground: React.FC = () => {
         <div
           className="absolute top-[35%] left-[-10%] w-[500px] h-[90px] rounded-full"
           style={{
-            background: `linear-gradient(0deg, transparent, rgba(168, 85, 247, 0.06), transparent)`,
+            background: `linear-gradient(0deg, transparent, rgba(2, 132, 199, 0.06), transparent)`,
             ...(motionDisabled
               ? {}
               : {
@@ -218,7 +218,7 @@ export const AnimatedBackground: React.FC = () => {
           const delay = i * 1.2;
           const size = 2 + (i % 3);
           const opacity = 0.25 + (i % 4) * 0.08;
-          const color = i % 3 === 0 ? '#0ea5e9' : i % 3 === 1 ? '#8b5cf6' : '#22d3ee';
+          const color = i % 3 === 0 ? '#0ea5e9' : i % 3 === 1 ? '#2563eb' : '#22d3ee';
 
           return (
             <div

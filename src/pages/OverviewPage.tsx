@@ -1,5 +1,5 @@
 import React from 'react';
-import { UnifiedTelemetry } from '../types/sensors';
+import { UnifiedTelemetry, HardwareStatus } from '../types/sensors';
 import { SensorCard } from '../components/SensorCard';
 import { TemperatureHumidityChart } from '../components/TemperatureHumidityChart';
 import { AccelerometerChart } from '../components/AccelerometerChart';
@@ -8,6 +8,7 @@ import { MpuTempChart } from '../components/MpuTempChart';
 import { RpmChart } from '../components/RpmChart';
 import { ServoAngleChart } from '../components/ServoAngleChart';
 import { ElectricalMeters } from '../components/ElectricalMeters';
+import { SystemStatusStrip } from '../components/SystemStatusStrip';
 import {
   Thermometer,
   Gauge,
@@ -18,9 +19,20 @@ import {
 interface OverviewPageProps {
   telemetry: UnifiedTelemetry | null;
   history: UnifiedTelemetry[];
+  status: HardwareStatus;
+  statusDetails: string;
+  dataSource: 'ESP32_WIFI' | 'SUPABASE';
+  isDemoMode: boolean;
 }
 
-export const OverviewPage: React.FC<OverviewPageProps> = ({ telemetry, history }) => {
+export const OverviewPage: React.FC<OverviewPageProps> = ({
+  telemetry,
+  history,
+  status,
+  statusDetails,
+  dataSource,
+  isDemoMode,
+}) => {
   const dht = telemetry?.dht11;
   const rpm = telemetry?.rpm;
   const mpu = telemetry?.mpu6050;
@@ -32,110 +44,125 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ telemetry, history }
     isSimulated: true,
   };
 
-  const isDhtValid = dht && dht.valid;
-  const isRpmValid = rpm && rpm.valid;
-  const isMpuValid = mpu && mpu.valid;
+  const isDhtValid = Boolean(dht && dht.valid);
+  const isRpmValid = Boolean(rpm && rpm.valid);
+  const isMpuValid = Boolean(mpu && mpu.valid);
+  const isRotating = Boolean(rpm?.motor_rotating);
+
+  const ambientTemp = isDhtValid ? dht?.temperature_c ?? null : null;
+  const dieTemp = isMpuValid ? mpu?.temperature_c ?? null : null;
+  const rpmValue = isRpmValid ? rpm?.value ?? 0 : 0;
 
   return (
-    <div className="space-y-6">
-      {/* Top Telemetry KPI Cards */}
+    <div className="space-y-5 sm:space-y-6">
+      {/* 1. Connectivity & data freshness — first thing an evaluator checks */}
+      <SystemStatusStrip
+        status={status}
+        statusDetails={statusDetails}
+        dataSource={dataSource}
+        isDemoMode={isDemoMode}
+        lastUpdateMs={telemetry?.timestamp_ms}
+      />
+
+      {/* 2. Primary live sensor readings */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Ambient Temperature (DHT11) - Humidity completely removed */}
+        {/* Ambient temperature (DHT11) */}
         <SensorCard
           title="Ambient Temperature"
-          value={isDhtValid && dht.temperature_c !== null ? `${dht.temperature_c}°C` : '--'}
+          value={ambientTemp !== null ? `${ambientTemp}°C` : '--'}
           subtitle={
-            isDhtValid && dht.temperature_c !== null
-              ? 'DHT11 Calibrated Ambient Air'
-              : 'DHT11 Offline'
+            ambientTemp !== null
+              ? 'DHT11 calibrated ambient air'
+              : 'DHT11 offline or awaiting first packet'
           }
           icon={Thermometer}
           status={isDhtValid ? 'normal' : 'offline'}
           accentColor="emerald"
-          badge="GPIO 4 (DHT11)"
+          badge="GPIO 4 · DHT11"
         >
-          <div className="flex justify-between items-center text-xs font-mono text-slate-500">
-            <span>Sensor Status:</span>
-            <span className={isDhtValid ? 'text-emerald-600 font-bold' : 'text-slate-400'}>
-              {isDhtValid ? 'REAL READING' : 'UNAVAILABLE'}
+          <div className="flex justify-between items-center text-[11px] font-mono text-slate-500">
+            <span>Source</span>
+            <span className={isDhtValid ? 'text-emerald-700 font-bold' : 'text-slate-400'}>
+              {isDhtValid ? 'REAL SENSOR' : 'UNAVAILABLE'}
             </span>
           </div>
         </SensorCard>
 
-        {/* Card 2: Motor RPM (NPN Sensor) */}
+        {/* Motor shaft RPM (NPN tachometer) */}
         <SensorCard
           title="Motor Shaft RPM"
-          value={isRpmValid && rpm.value !== null ? rpm.value : 0}
+          value={rpmValue}
           unit="RPM"
-          subtitle={`Max Session: ${telemetry?.maxRpmSession ?? 0} RPM`}
+          subtitle={`Session peak ${telemetry?.maxRpmSession ?? 0} RPM`}
           icon={Gauge}
-          status={isRpmValid ? 'normal' : 'offline'}
+          status={isRpmValid ? (isRotating ? 'normal' : 'idle') : 'offline'}
+          statusLabel={
+            !isRpmValid ? 'OFFLINE' : isRotating ? 'SPINNING' : 'STOPPED'
+          }
           accentColor="cyan"
-          badge="GPIO 5 (NPN)"
+          badge="GPIO 5 · NPN"
         >
-          <div className="flex justify-between items-center text-xs font-mono text-slate-500">
-            <span>Cumulative Pulses:</span>
-            <span className="text-sky-600 font-bold">{rpm?.pulse_count ?? 0}</span>
+          <div className="flex justify-between items-center text-[11px] font-mono text-slate-500">
+            <span>Cumulative pulses</span>
+            <span className="text-sky-700 font-bold tabular-nums">{rpm?.pulse_count ?? 0}</span>
           </div>
         </SensorCard>
 
-        {/* Card 3: MPU6050 Silicon Die Temp */}
+        {/* MPU6050 die temperature */}
         <SensorCard
           title="MPU6050 Die Temp"
-          value={isMpuValid && mpu.temperature_c !== null ? `${mpu.temperature_c}°C` : '--'}
-          subtitle="Internal IMU Sensor Die"
+          value={dieTemp !== null ? `${dieTemp}°C` : '--'}
+          subtitle="IMU silicon die — not ambient air"
           icon={Cpu}
           status={isMpuValid ? 'normal' : 'offline'}
-          accentColor="purple"
-          badge="I2C 0x68"
+          accentColor="blue"
+          badge="I²C 0x68"
         >
-          <div className="flex justify-between items-center text-xs font-mono text-slate-500">
-            <span>Distinct from DHT11:</span>
-            <span className={isMpuValid ? 'text-indigo-600 font-bold' : 'text-slate-400'}>
+          <div className="flex justify-between items-center text-[11px] font-mono text-slate-500">
+            <span>Channel</span>
+            <span className={isMpuValid ? 'text-sky-700 font-bold' : 'text-slate-400'}>
               {isMpuValid ? 'CALIBRATED' : 'UNAVAILABLE'}
             </span>
           </div>
         </SensorCard>
 
-        {/* Card 4: Servo Commanded Angle */}
+        {/* Servo commanded angle */}
         <SensorCard
           title="Servo Angle"
           value={`${servo?.commanded_angle_deg ?? 0}°`}
-          subtitle={`Physical Command: ${servo?.output_angle_deg ?? 180}°`}
+          subtitle={`Physical command ${servo?.output_angle_deg ?? 180}° (180 − angle)`}
           icon={Compass}
           status={servo?.test_active ? 'warning' : 'normal'}
           statusLabel={servo?.test_active ? 'TESTING' : 'IDLE'}
           accentColor="amber"
-          badge="GPIO 18"
+          badge="GPIO 18 · PWM"
         >
-          <div className="flex justify-between items-center text-xs font-mono text-slate-500">
-            <span>10-Min Sequence:</span>
-            <span className="text-amber-600 font-bold">
-              {servo?.test_active ? 'IN PROGRESS' : 'READY / COMPLETED'}
+          <div className="flex justify-between items-center text-[11px] font-mono text-slate-500">
+            <span>10-min sequence</span>
+            <span className="text-amber-700 font-bold">
+              {servo?.test_active ? 'IN PROGRESS' : 'READY / DONE'}
             </span>
           </div>
         </SensorCard>
       </div>
 
-      {/* Two Prominent Simulated Electrical Meters */}
+      {/* 3. Electrical measurements — always labelled simulated */}
       <ElectricalMeters electrical={electrical} />
 
-      {/* Real-time Dynamic Charts Previews */}
-
-      {/* Row 1: RPM + Servo — above temperature charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* 4. RPM & servo performance */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
         <RpmChart history={history} maxRpmSession={telemetry?.maxRpmSession ?? 0} />
         <ServoAngleChart history={history} />
       </div>
 
-      {/* Row 2: DHT11 Temperature + MPU6050 Die Temp */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* 5. Temperature trends */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
         <TemperatureHumidityChart history={history} />
         <MpuTempChart history={history} />
       </div>
 
-      {/* Row 3: Accelerometer + Gyroscope */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* 6. Motion trends */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
         <AccelerometerChart history={history} />
         <GyroscopeChart history={history} />
       </div>

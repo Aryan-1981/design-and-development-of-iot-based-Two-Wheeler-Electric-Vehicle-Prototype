@@ -1,11 +1,16 @@
 import React from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Zap, Activity, BatteryCharging } from 'lucide-react';
 import { SimulatedElectricalValues } from '../types/sensors';
 
 interface ElectricalMetersProps {
   electrical: SimulatedElectricalValues;
 }
 
+/**
+ * Voltage / current / derived power meters.
+ * STRICTLY SIMULATED: no physical voltage or current sensor is connected —
+ * every value here is modelled and must stay visibly labelled as such.
+ */
 export const ElectricalMeters: React.FC<ElectricalMetersProps> = ({ electrical }) => {
   // Voltage Gauge: 40V to 56V scale
   const vMin = 40;
@@ -16,117 +21,151 @@ export const ElectricalMeters: React.FC<ElectricalMetersProps> = ({ electrical }
   const aMax = 30;
   const aPct = Math.min(100, Math.max(0, (electrical.current_a / aMax) * 100));
 
+  // Power is arithmetic on the two simulated channels (P = V × I)
+  const pMax = 1400;
+  const pPct = Math.min(100, Math.max(0, (electrical.power_w / pMax) * 100));
+
   return (
-    <div className="space-y-4">
-      {/* Mandatory Disclaimer Badge */}
-      <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200/90 flex items-start gap-3 text-xs font-mono text-amber-900 shadow-sm">
-        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-        <div>
-          <span className="font-bold uppercase tracking-wider block text-amber-800">
-            Simulated Electrical Values Notice
-          </span>
-          Voltage and current are not connected to real sensors. These values are dynamically
-          modeled to demonstrate simulated battery load and motor power consumption.
-        </div>
+    <section className="space-y-4" aria-label="Simulated electrical monitoring">
+      {/* Mandatory simulated-data disclaimer */}
+      <div
+        className="rounded-card border border-amber-300/80 bg-amber-50/80 p-3.5 flex items-start gap-3 text-xs leading-relaxed text-amber-900"
+        role="note"
+      >
+        <span className="ev-chip ev-chip-warn shrink-0 mt-0.5">
+          <AlertTriangle className="w-3 h-3" aria-hidden="true" />
+          Simulated
+        </span>
+        <p>
+          <span className="font-bold uppercase tracking-wide">Simulated electrical values.</span>{' '}
+          No voltage or current sensor is connected to the prototype. These channels are modelled
+          from motor activity to demonstrate battery-load behaviour — they are{' '}
+          <span className="font-semibold">not hardware measurements</span>.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Voltmeter Card */}
-        <div data-cursor="METERS" className="glass-panel p-6 rounded-2xl flex flex-col items-center justify-between shadow-sm">
-          <div className="w-full flex items-center justify-between pb-3 border-b border-slate-200/80">
-            <span className="text-xs font-mono uppercase text-slate-500 font-semibold">Pack Voltage (Simulated)</span>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-              SIMULATED METER
-            </span>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        {/* Voltmeter */}
+        <MeterCard
+          title="Pack Voltage"
+          icon={BatteryCharging}
+          value={electrical.voltage_v.toFixed(1)}
+          unit="V DC"
+          pct={vPct}
+          stroke="#2563EB"
+          glow="rgba(37, 99, 235, 0.3)"
+          minLabel="40V Cutoff"
+          midLabel="48V Nominal"
+          maxLabel="54.6V Full"
+        />
 
-          {/* Radial Voltage Gauge */}
-          <div className="relative w-48 h-32 flex items-end justify-center overflow-hidden my-4">
-            <svg className="w-48 h-48 -rotate-[135deg] transform" viewBox="0 0 200 200">
-              <circle
-                cx="100"
-                cy="100"
-                r="70"
-                fill="none"
-                stroke="#e2e8f0"
-                strokeWidth="10"
-                strokeDasharray="330 440"
-              />
-              <circle
-                cx="100"
-                cy="100"
-                r="70"
-                fill="none"
-                stroke="#2563eb"
-                strokeWidth="10"
-                strokeDasharray={`${(vPct / 100) * 330} 440`}
-                className="transition-all duration-300"
-                style={{ filter: 'drop-shadow(0 0 6px rgba(37, 99, 235, 0.3))' }}
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center mt-6">
-              <span className="text-3xl font-extrabold font-mono text-slate-900">
-                {electrical.voltage_v.toFixed(1)}
-              </span>
-              <span className="text-xs font-mono text-slate-500 font-semibold">VOLTS DC</span>
-            </div>
-          </div>
+        {/* Ammeter */}
+        <MeterCard
+          title="Motor Current"
+          icon={Activity}
+          value={electrical.current_a.toFixed(1)}
+          unit="A"
+          pct={aPct}
+          stroke="#D97706"
+          glow="rgba(217, 119, 6, 0.3)"
+          minLabel="0A Idle"
+          midLabel="15A Cruise"
+          maxLabel="30A Max"
+        />
 
-          <div className="w-full flex justify-between text-[10px] font-mono text-slate-400 px-4 font-medium">
-            <span>40V (Cutoff)</span>
-            <span>48V (Nominal)</span>
-            <span>54.6V (Full)</span>
-          </div>
-        </div>
-
-        {/* Ammeter Card */}
-        <div data-cursor="METERS" className="glass-panel p-6 rounded-2xl flex flex-col items-center justify-between shadow-sm">
-          <div className="w-full flex items-center justify-between pb-3 border-b border-slate-200/80">
-            <span className="text-xs font-mono uppercase text-slate-500 font-semibold">Motor Current (Simulated)</span>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-              SIMULATED METER
-            </span>
-          </div>
-
-          {/* Radial Ammeter Gauge */}
-          <div className="relative w-48 h-32 flex items-end justify-center overflow-hidden my-4">
-            <svg className="w-48 h-48 -rotate-[135deg] transform" viewBox="0 0 200 200">
-              <circle
-                cx="100"
-                cy="100"
-                r="70"
-                fill="none"
-                stroke="#e2e8f0"
-                strokeWidth="10"
-                strokeDasharray="330 440"
-              />
-              <circle
-                cx="100"
-                cy="100"
-                r="70"
-                fill="none"
-                stroke="#d97706"
-                strokeWidth="10"
-                strokeDasharray={`${(aPct / 100) * 330} 440`}
-                className="transition-all duration-300"
-                style={{ filter: 'drop-shadow(0 0 6px rgba(217, 119, 6, 0.3))' }}
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center mt-6">
-              <span className="text-3xl font-extrabold font-mono text-slate-900">
-                {electrical.current_a.toFixed(1)}
-              </span>
-              <span className="text-xs font-mono text-slate-500 font-semibold">AMPERES</span>
-            </div>
-          </div>
-
-          <div className="w-full flex justify-between text-[10px] font-mono text-slate-400 px-4 font-medium">
-            <span>0A (Idle)</span>
-            <span>15A (Cruise)</span>
-            <span>30A (Max Draw)</span>
-          </div>
-        </div>
+        {/* Derived power */}
+        <MeterCard
+          title="Derived Power"
+          icon={Zap}
+          value={electrical.power_w.toFixed(0)}
+          unit="W"
+          pct={pPct}
+          stroke="#0284C7"
+          glow="rgba(2, 132, 199, 0.3)"
+          minLabel="0 W"
+          midLabel="P = V × I"
+          maxLabel={`${pMax} W`}
+          note="Calculated from the two simulated channels"
+        />
       </div>
-    </div>
+    </section>
   );
 };
+
+interface MeterCardProps {
+  title: string;
+  icon: React.ElementType;
+  value: string;
+  unit: string;
+  pct: number;
+  stroke: string;
+  glow: string;
+  minLabel: string;
+  midLabel: string;
+  maxLabel: string;
+  note?: string;
+}
+
+const MeterCard: React.FC<MeterCardProps> = ({
+  title,
+  icon: Icon,
+  value,
+  unit,
+  pct,
+  stroke,
+  glow,
+  minLabel,
+  midLabel,
+  maxLabel,
+  note,
+}) => (
+  <div className="ev-panel p-5 flex flex-col items-center justify-between" data-cursor="METERS">
+    <div className="w-full flex items-center justify-between pb-3 border-b border-slate-200/80">
+      <span className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+        <Icon className="w-4 h-4 text-slate-400" aria-hidden="true" />
+        {title}
+      </span>
+      <span className="ev-chip ev-chip-warn">Simulated</span>
+    </div>
+
+    {/* Radial gauge */}
+    <div className="relative w-44 h-28 flex items-end justify-center overflow-hidden my-4">
+      <svg className="w-44 h-44 -rotate-[135deg] transform" viewBox="0 0 200 200" aria-hidden="true">
+        <circle
+          cx="100"
+          cy="100"
+          r="70"
+          fill="none"
+          stroke="#E2E8F0"
+          strokeWidth="10"
+          strokeDasharray="330 440"
+        />
+        <circle
+          cx="100"
+          cy="100"
+          r="70"
+          fill="none"
+          stroke={stroke}
+          strokeWidth="10"
+          strokeDasharray={`${(pct / 100) * 330} 440`}
+          className="transition-all duration-300"
+          style={{ filter: `drop-shadow(0 0 6px ${glow})` }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center mt-5">
+        <span className="ev-metric text-3xl font-bold text-slate-900" aria-live="polite">
+          {value}
+        </span>
+        <span className="ev-eyebrow mt-0.5">{unit}</span>
+      </div>
+    </div>
+
+    <div className="w-full flex justify-between text-[10px] font-mono text-slate-400 px-1">
+      <span>{minLabel}</span>
+      <span>{midLabel}</span>
+      <span>{maxLabel}</span>
+    </div>
+
+    {note && <p className="mt-3 text-[10px] font-mono text-slate-400 text-center">{note}</p>}
+  </div>
+);

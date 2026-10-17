@@ -4,83 +4,89 @@ interface RpmGaugeProps {
   rpm: number;
   maxRpm?: number;
   isRotating: boolean;
+  /** True when the RPM reading is invalid / stream has no samples */
+  isStale?: boolean;
 }
 
-export const RpmGauge: React.FC<RpmGaugeProps> = ({ rpm, maxRpm = 3000, isRotating }) => {
+export const RpmGauge: React.FC<RpmGaugeProps> = ({
+  rpm,
+  maxRpm = 3000,
+  isRotating,
+  isStale = false,
+}) => {
   const percentage = Math.min(100, Math.max(0, (rpm / maxRpm) * 100));
-  // 240 degree gauge arc (-120 to +120)
-  const angle = (percentage / 100) * 240 - 120;
 
-  // Determine color based on threshold
-  let strokeColor = '#4f46e5'; // electric indigo
-  if (percentage > 70) strokeColor = '#d97706'; // warm amber
-  if (percentage > 88) strokeColor = '#e11d48'; // vibrant rose
+  // Threshold colors: cyan (normal) → amber (elevated) → rose (critical)
+  let strokeColor = '#0EA5E9';
+  if (percentage > 70) strokeColor = '#D97706';
+  if (percentage > 88) strokeColor = '#E11D48';
 
   const radius = 80;
   const circumference = 2 * Math.PI * radius;
-  // Arc is 240/360 = 2/3 of circle
+  // 240 degree gauge arc
   const arcLength = circumference * (240 / 360);
   const strokeDashoffset = arcLength - (arcLength * percentage) / 100;
 
   return (
-    <div className="relative flex flex-col items-center justify-center p-4">
+    <div className="relative flex flex-col items-center justify-center py-2">
       <div className="relative w-52 h-44 flex items-center justify-center">
-        <svg className="w-52 h-52 -rotate-[210deg] transform" viewBox="0 0 200 200">
-          {/* Background Track */}
+        <svg className="w-52 h-52 -rotate-[210deg] transform" viewBox="0 0 200 200" aria-hidden="true">
+          {/* Background track */}
           <circle
             cx="100"
             cy="100"
             r={radius}
             fill="none"
-            stroke="#e2e8f0"
-            strokeWidth="12"
+            stroke="#E2E8F0"
+            strokeWidth="11"
             strokeDasharray={`${arcLength} ${circumference}`}
             strokeLinecap="round"
           />
-          {/* Dynamic Active Gauge Arc */}
+          {/* Dynamic active arc */}
           <circle
             cx="100"
             cy="100"
             r={radius}
             fill="none"
-            stroke={strokeColor}
-            strokeWidth="12"
+            stroke={isStale ? '#94A3B8' : strokeColor}
+            strokeWidth="11"
             strokeDasharray={`${arcLength} ${circumference}`}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
             className="transition-all duration-300 ease-out"
             style={{
-              filter: `drop-shadow(0 0 6px ${strokeColor}44)`,
+              filter: isStale ? undefined : `drop-shadow(0 0 6px ${strokeColor}55)`,
             }}
           />
         </svg>
 
-        {/* Center Display */}
+        {/* Center readout */}
         <div className="absolute inset-0 flex flex-col items-center justify-center mt-3">
-          <div className="text-3xl font-extrabold font-mono tracking-tight text-slate-900 flex items-baseline">
-            {rpm}
-            <span className="text-xs text-slate-500 font-sans ml-1 font-semibold">RPM</span>
+          <div
+            className="ev-metric text-3xl font-bold text-slate-900 flex items-baseline"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {isStale ? '--' : rpm}
+            <span className="text-[11px] text-slate-500 font-sans ml-1 font-semibold">RPM</span>
           </div>
 
-          <div className="mt-1 flex items-center gap-1.5">
+          <div className="mt-1.5 flex items-center gap-1.5">
             <span
-              className={`w-2 h-2 rounded-full ${
-                isRotating ? 'bg-emerald-500 animate-ping' : 'bg-slate-300'
+              className={`w-1.5 h-1.5 rounded-full ${
+                isStale ? 'bg-slate-300' : isRotating ? 'bg-emerald-500 signal-live' : 'bg-slate-300'
               }`}
+              aria-hidden="true"
             />
-            <span className="text-[11px] font-mono font-medium text-slate-600">
-              {isRotating ? 'MOTOR SPINNING' : 'STANDSTILL'}
+            <span className="ev-eyebrow">
+              {isStale ? 'No Reading' : isRotating ? 'Motor Spinning' : 'Standstill'}
             </span>
-          </div>
-
-          <div className="text-[10px] font-mono text-slate-400 mt-1 font-medium">
-            PEAK SCALE: {maxRpm} RPM
           </div>
         </div>
       </div>
 
       {/* Scale tick labels */}
-      <div className="w-full flex justify-between px-6 text-[10px] font-mono text-slate-400 -mt-2 font-medium">
+      <div className="w-full flex justify-between px-6 text-[10px] font-mono text-slate-400 -mt-1">
         <span>0</span>
         <span>{Math.round(maxRpm * 0.25)}</span>
         <span>{Math.round(maxRpm * 0.5)}</span>

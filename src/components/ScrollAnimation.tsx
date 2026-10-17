@@ -2,15 +2,26 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   useScroll,
   useSpring,
+  useTransform,
+  motion,
 } from 'framer-motion';
-import { ChevronDown, ArrowDown, Cpu, Gauge, Zap, AlertTriangle, Layers } from 'lucide-react';
+import { ChevronDown, ArrowDown, Cpu, Gauge, Zap, AlertTriangle } from 'lucide-react';
 import { MitsLogo } from './MitsLogo';
 
 interface ScrollAnimationProps {
   onEnterDashboard?: () => void;
 }
 
-export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({ onEnterDashboard }) => {
+const TOTAL_FRAMES_FALLBACK = 300;
+
+/**
+ * Scroll-controlled motorcycle frame sequence.
+ * PROTECTED BEHAVIOUR: 300 extracted video frames are preloaded and rendered
+ * to a fullscreen canvas driven by scroll progress (down = forward,
+ * up = reverse). Only presentation may change — mapping, preloading, canvas
+ * rendering, sticky layout, and frame sequencing stay intact.
+ */
+export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({ onEnterDashboard: _onEnterDashboard }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -33,39 +44,9 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({ onEnterDashboa
     restDelta: 0.001,
   });
 
-  // 1. Fetch frames manifest
-  useEffect(() => {
-    let isCancelled = false;
-
-    async function loadManifest() {
-      try {
-        const res = await fetch('/frames-manifest.json');
-        if (!res.ok) throw new Error('Manifest not found');
-        const data = await res.json();
-        if (data.frames && data.frames.length > 0 && !isCancelled) {
-          setFrames(data.frames);
-          preloadFrames(data.frames);
-        } else {
-          throw new Error('Manifest is empty');
-        }
-      } catch (err: any) {
-        console.warn('Falling back to direct 300-frame sequence:', err);
-        const fallback = Array.from({ length: 300 }, (_, i) => {
-          const num = String(i + 1).padStart(3, '0');
-          return `/frames/ezgif-frame-${num}.jpg`;
-        });
-        if (!isCancelled) {
-          setFrames(fallback);
-          preloadFrames(fallback);
-        }
-      }
-    }
-
-    loadManifest();
-    return () => {
-      isCancelled = true;
-    };
-  }, []);
+  // HUD opacity: full while the hero is the focus, fades as the dashboard arrives
+  const hudOpacity = useTransform(smoothProgress, [0.86, 0.99], [1, 0]);
+  const contentOpacity = useTransform(smoothProgress, [0.78, 0.97], [1, 0]);
 
   // 2. Progressive preloading
   const preloadFrames = useCallback((frameList: string[]) => {
@@ -96,6 +77,40 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({ onEnterDashboa
     });
     setImages(loadedImgs);
   }, []);
+
+  // 1. Fetch frames manifest
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function loadManifest() {
+      try {
+        const res = await fetch('/frames-manifest.json');
+        if (!res.ok) throw new Error('Manifest not found');
+        const data = await res.json();
+        if (data.frames && data.frames.length > 0 && !isCancelled) {
+          setFrames(data.frames);
+          preloadFrames(data.frames);
+        } else {
+          throw new Error('Manifest is empty');
+        }
+      } catch (err: any) {
+        console.warn('Falling back to direct 300-frame sequence:', err);
+        const fallback = Array.from({ length: TOTAL_FRAMES_FALLBACK }, (_, i) => {
+          const num = String(i + 1).padStart(3, '0');
+          return `/frames/ezgif-frame-${num}.jpg`;
+        });
+        if (!isCancelled) {
+          setFrames(fallback);
+          preloadFrames(fallback);
+        }
+      }
+    }
+
+    loadManifest();
+    return () => {
+      isCancelled = true;
+    };
+  }, [preloadFrames]);
 
   // 3. Render Canvas frame on scroll progress change
   const renderFrame = useCallback(
@@ -172,7 +187,10 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({ onEnterDashboa
     }
   };
 
-  const progressPercent = frames.length > 0 ? Math.round((loadedCount / frames.length) * 100) : 0;
+  const progressPercent =
+    frames.length > 0 ? Math.round((loadedCount / frames.length) * 100) : 0;
+  const frameProgress =
+    frames.length > 1 ? currentFrameIndex / (frames.length - 1) : 0;
 
   return (
     <div ref={containerRef} className="relative w-full h-[450vh] bg-[#080d1a]">
@@ -184,23 +202,34 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({ onEnterDashboa
           className="absolute inset-0 w-full h-full object-cover filter contrast-[1.08] brightness-[0.88]"
         />
 
-        {/* Cinematic Overlays: Vignette & Radial Gradients */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#080d1a] via-black/40 to-[#080d1a]/80 pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-[#080d1a]/40 to-[#080d1a]/95 pointer-events-none" />
-
-        {/* Ambient Grid overlay */}
+        {/* Cinematic overlays: top/bottom scrims + vignette for text legibility */}
         <div
-          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+          className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: `linear-gradient(#06b6d4 1px, transparent 1px), linear-gradient(90deg, #06b6d4 1px, transparent 1px)`,
-            backgroundSize: '48px 48px',
+            background:
+              'linear-gradient(180deg, rgba(8,13,26,0.92) 0%, rgba(8,13,26,0.45) 22%, rgba(8,13,26,0.30) 55%, rgba(8,13,26,0.94) 100%)',
+          }}
+        />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-[#080d1a]/35 to-[#080d1a]/90 pointer-events-none" />
+
+        {/* Restrained ambient grid overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
+          style={{
+            backgroundImage: `linear-gradient(rgba(6, 182, 212, 1) 1px, transparent 1px), linear-gradient(90deg, rgba(6, 182, 212, 1) 1px, transparent 1px)`,
+            backgroundSize: '56px 56px',
+            maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)',
+            WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)',
           }}
         />
 
         {/* Error notification if frames fail */}
         {errorMsg && (
-          <div className="absolute top-6 left-6 right-6 max-w-xl mx-auto z-50 bg-rose-950/80 border border-rose-500/60 p-4 rounded-xl backdrop-blur-md flex items-start space-x-3 text-rose-200 text-sm shadow-2xl">
-            <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+          <div
+            role="alert"
+            className="absolute top-6 left-6 right-6 max-w-xl mx-auto z-50 bg-rose-950/80 border border-rose-500/60 p-4 rounded-xl backdrop-blur-md flex items-start space-x-3 text-rose-200 text-sm shadow-2xl"
+          >
+            <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" aria-hidden="true" />
             <div>
               <div className="font-semibold text-rose-100">Animation Warning</div>
               <p className="mt-1 text-xs opacity-90">{errorMsg}</p>
@@ -208,91 +237,113 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({ onEnterDashboa
           </div>
         )}
 
-        {/* Foreground Hero Content Card */}
-        <div className="relative z-30 max-w-4xl mx-auto px-6 text-center flex flex-col items-center">
-          {/* Top Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/70 border border-cyan-500/30 text-cyan-300 text-xs font-mono uppercase tracking-wider backdrop-blur-md mb-6 shadow-glow-cyan/20">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-            <span>EV Telemetry Laboratory Prototype</span>
-            <span className="text-cyan-600">|</span>
-            <span className="text-slate-400">ESP32 2.4GHz Wi-Fi / RTOS</span>
+        {/* Foreground hero content */}
+        <motion.div
+          style={{ opacity: contentOpacity }}
+          className="relative z-30 max-w-4xl mx-auto px-6 text-center flex flex-col items-center"
+        >
+          {/* Project badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/25 text-cyan-300 text-[11px] font-mono uppercase tracking-[0.18em] backdrop-blur-md mb-5">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" aria-hidden="true" />
+            <span>EV Telemetry Prototype</span>
+            <span className="text-cyan-700" aria-hidden="true">|</span>
+            <span className="text-slate-400">ESP32 · Wi-Fi · RTOS</span>
           </div>
 
-          {/* MITS Institutional Crest — high-impact branding centerpiece */}
-          <MitsLogo variant="hero" className="mb-6 lg:mb-8" />
+          {/* MITS institutional crest */}
+          <MitsLogo variant="hero" className="mb-5 lg:mb-7" />
 
-          {/* Full Mandatory Title */}
-          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-cyan-300 tracking-tight leading-tight drop-shadow-lg">
-            IoT-Based Performance Monitoring of Two-Wheeler Electric Vehicles
+          {/* Mandatory project title */}
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-[3.4rem] font-extrabold text-white tracking-tight leading-[1.08] drop-shadow-lg">
+            IoT-Based Performance Monitoring
+            <span className="block text-cyan-200/95">of Two-Wheeler Electric Vehicles</span>
           </h1>
 
-          {/* Subtitle */}
-          <p className="mt-4 text-sm sm:text-base md:text-lg text-cyan-100/80 font-light tracking-wide max-w-2xl">
-            Real-time tachometric velocity, chassis 6-DOF vibration profiles, motor thermal
-            dispersion, and actuator positioning.
+          {/* Engineering description — matches verified capabilities */}
+          <p className="mt-4 text-sm sm:text-base md:text-lg text-slate-300/90 font-light tracking-wide max-w-2xl leading-relaxed">
+            Real-time motor RPM, chassis vibration profiles, motor and ambient temperature,
+            and servo actuator positioning — streamed live from the ESP32 prototype.
           </p>
 
-          {/* Hardware Badges */}
-          <div className="mt-6 flex flex-wrap justify-center items-center gap-2.5 text-xs text-slate-300 font-mono">
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-900/60 border border-slate-700/60 rounded-md backdrop-blur">
-              <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-              <span>ESP32 MCU</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-900/60 border border-slate-700/60 rounded-md backdrop-blur">
-              <Gauge className="w-3.5 h-3.5 text-emerald-400" />
-              <span>NPN RPM (GPIO 5)</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-900/60 border border-slate-700/60 rounded-md backdrop-blur">
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
-              <span>Servo (GPIO 18)</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-900/60 border border-slate-700/60 rounded-md backdrop-blur">
-              <span className="w-2 h-2 rounded-full bg-blue-400"></span>
-              <span>MPU6050 (I2C) & DHT11</span>
-            </div>
-          </div>
+          {/* Verified hardware badges */}
+          <ul className="mt-6 flex flex-wrap justify-center items-center gap-2 text-[11px] text-slate-300 font-mono">
+            {[
+              { icon: Cpu, label: 'ESP32 MCU', dot: false, iconClass: 'text-cyan-400' },
+              { icon: Gauge, label: 'NPN RPM · GPIO 5', dot: false, iconClass: 'text-cyan-300' },
+              { icon: Zap, label: 'Servo · GPIO 18', dot: false, iconClass: 'text-amber-400' },
+            ].map((badge) => (
+              <li
+                key={badge.label}
+                className="flex items-center gap-1.5 px-3 py-1 bg-slate-900/55 border border-slate-700/50 rounded-md backdrop-blur-sm"
+              >
+                <badge.icon className={`w-3.5 h-3.5 ${badge.iconClass}`} aria-hidden="true" />
+                <span>{badge.label}</span>
+              </li>
+            ))}
+            <li className="flex items-center gap-1.5 px-3 py-1 bg-slate-900/55 border border-slate-700/50 rounded-md backdrop-blur-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" aria-hidden="true" />
+              <span>MPU6050 (I²C) · DHT11</span>
+            </li>
+          </ul>
 
-          {/* Action Button & Scroll Prompt */}
-          <div className="mt-10 flex flex-col items-center gap-3">
+          {/* CTA + scroll guidance */}
+          <div className="mt-9 flex flex-col items-center gap-3">
             <button
+              type="button"
               onClick={scrollToDashboard}
               data-cursor="EXPLORE"
-              className="group relative inline-flex items-center gap-3 px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-sm sm:text-base shadow-glow-cyan hover:shadow-cyan-400/50 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
+              className="group inline-flex items-center gap-3 px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-sm sm:text-base shadow-glow-cyan hover:shadow-cyan-400/50 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
             >
               <span>Explore Telemetry Dashboard</span>
-              <ChevronDown className="w-4 h-4 text-slate-950 group-hover:translate-y-1 transition-transform" />
+              <ChevronDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" aria-hidden="true" />
             </button>
 
-            {/* Scroll Indicator */}
-            <div className="flex items-center gap-2 text-xs font-mono text-cyan-400/90 animate-bounce mt-2">
-              <ArrowDown className="w-3.5 h-3.5" />
-              <span>SCROLL TO EXPLORE MOTORCYCLE FRAMES</span>
-            </div>
+            <p className="flex items-center gap-2 text-[11px] font-mono text-cyan-300/80 tracking-[0.18em] uppercase mt-1">
+              <ArrowDown className="w-3.5 h-3.5" aria-hidden="true" />
+              Scroll to advance frames
+            </p>
 
             {isLoading && (
-              <div className="text-[11px] text-cyan-300 font-mono flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
-                <span>Preloading 1440p frames: {progressPercent}% ({loadedCount}/{frames.length || 300})</span>
-              </div>
+              <p className="text-[11px] text-cyan-300/90 font-mono flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" aria-hidden="true" />
+                <span>
+                  Preloading frames: {progressPercent}% ({loadedCount}/{frames.length || TOTAL_FRAMES_FALLBACK})
+                </span>
+              </p>
             )}
           </div>
-        </div>
+        </motion.div>
 
-        {/* Floating Bottom Bar: Frame Indicator & Scroll Status */}
-        <div className="absolute bottom-6 left-6 right-6 z-40 flex items-center justify-between text-xs text-slate-400 font-mono">
-          <div className="flex items-center gap-3 bg-slate-900/80 border border-slate-800/80 px-4 py-2 rounded-lg backdrop-blur-md">
-            <span>
-              FRAME: <span className="text-cyan-400 font-bold">{String(currentFrameIndex + 1).padStart(3, '0')}</span> / {frames.length || 300}
+        {/* Bottom HUD: frame counter + scroll direction + progress */}
+        <motion.div
+          style={{ opacity: hudOpacity }}
+          className="absolute bottom-5 left-5 right-5 z-40 flex items-end justify-between gap-4 text-[11px] text-slate-400 font-mono"
+        >
+          <div className="bg-slate-900/80 border border-slate-700/60 px-4 py-2.5 rounded-lg backdrop-blur-md">
+            <div className="flex items-center gap-3">
+              <span className="tracking-[0.14em] uppercase text-slate-500">Frame</span>
+              <span className="text-cyan-300 font-bold tabular-nums">
+                {String(currentFrameIndex + 1).padStart(3, '0')}
+              </span>
+              <span className="text-slate-600">/</span>
+              <span className="tabular-nums">{frames.length || TOTAL_FRAMES_FALLBACK}</span>
+            </div>
+            {/* Frame progress rail */}
+            <div className="mt-2 w-40 sm:w-56 h-1 rounded-full bg-slate-700/70 overflow-hidden" aria-hidden="true">
+              <div
+                className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-[width] duration-100 ease-out"
+                style={{ width: `${Math.max(2, frameProgress * 100)}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="hidden sm:flex items-center gap-2 bg-slate-900/80 border border-slate-700/60 px-4 py-2.5 rounded-lg backdrop-blur-md">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" aria-hidden="true" />
+            <span className="tracking-[0.1em] uppercase text-slate-400">
+              Scroll down to advance · up to reverse
             </span>
-            <span className="text-slate-600">|</span>
-            <span className="text-slate-300">SCROLL-CONTROLLED</span>
           </div>
-
-          <div className="hidden sm:flex items-center gap-2 bg-slate-900/80 border border-slate-800/80 px-4 py-2 rounded-lg backdrop-blur-md text-slate-400">
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Scroll Down to Advance • Scroll Up to Reverse</span>
-          </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

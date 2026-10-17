@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Wifi, WifiOff, RefreshCw, Database, Settings2, AlertCircle } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Wifi, WifiOff, RefreshCw, Database, Settings2, AlertCircle, Cloud, X } from 'lucide-react';
 import { HardwareStatus } from '../types/sensors';
 
 interface ConnectionStatusProps {
@@ -19,7 +19,7 @@ interface ConnectionStatusProps {
 
 export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
   status,
-  statusDetails: _statusDetails,
+  statusDetails,
   esp32Url,
   onUpdateUrl,
   isDemoMode,
@@ -35,36 +35,48 @@ export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
   const [tempUrl, setTempUrl] = useState(esp32Url);
   const [tempSbUrl, setTempSbUrl] = useState(supabaseUrl);
   const [tempSbKey, setTempSbKey] = useState(supabaseKey);
+  const panelRef = useRef<HTMLFormElement | null>(null);
+
+  // Close the config popover on Escape
+  useEffect(() => {
+    if (!showConfig) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowConfig(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showConfig]);
 
   const statusConfig = {
     LIVE: {
-      label: dataSource === 'SUPABASE' ? 'SUPABASE LIVE' : 'ESP32 LIVE',
-      badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-300 shadow-sm',
-      icon: dataSource === 'SUPABASE' ? (
-        <Database className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
-      ) : (
-        <Wifi className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
-      ),
+      label: dataSource === 'SUPABASE' ? 'Supabase Live' : 'ESP32 Live',
+      chipClass: 'ev-chip-ok',
+      icon:
+        dataSource === 'SUPABASE' ? (
+          <Database className="w-3 h-3" aria-hidden="true" />
+        ) : (
+          <Wifi className="w-3 h-3" aria-hidden="true" />
+        ),
     },
     CONNECTING: {
-      label: 'CONNECTING',
-      badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-      icon: <RefreshCw className="w-3.5 h-3.5 text-indigo-600 animate-spin" />,
+      label: 'Connecting',
+      chipClass: 'ev-chip-info',
+      icon: <RefreshCw className="w-3 h-3 animate-spin" aria-hidden="true" />,
     },
     STALE: {
-      label: 'STALE DATA',
-      badgeClass: 'bg-amber-50 text-amber-700 border-amber-300',
-      icon: <AlertCircle className="w-3.5 h-3.5 text-amber-600 animate-pulse" />,
+      label: 'Stale Data',
+      chipClass: 'ev-chip-warn',
+      icon: <AlertCircle className="w-3 h-3" aria-hidden="true" />,
     },
     OFFLINE: {
-      label: 'OFFLINE',
-      badgeClass: 'bg-slate-100 text-slate-600 border-slate-300',
-      icon: <WifiOff className="w-3.5 h-3.5 text-slate-500" />,
+      label: 'Offline',
+      chipClass: 'ev-chip-muted',
+      icon: <WifiOff className="w-3 h-3" aria-hidden="true" />,
     },
     ERROR: {
-      label: 'SENSOR ERROR',
-      badgeClass: 'bg-rose-50 text-rose-700 border-rose-300',
-      icon: <AlertCircle className="w-3.5 h-3.5 text-rose-600" />,
+      label: 'Sensor Error',
+      chipClass: 'ev-chip-crit',
+      icon: <AlertCircle className="w-3 h-3" aria-hidden="true" />,
     },
   }[status];
 
@@ -78,155 +90,188 @@ export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
   };
 
   return (
-    <div className="relative">
-      <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-        {/* Source Switcher: Direct Wi-Fi vs Supabase Cloud */}
-        <div className="flex items-center rounded-xl border border-slate-200/90 bg-slate-100/90 p-0.5 shadow-sm">
-          <button
-            onClick={() => onToggleDataSource('ESP32_WIFI')}
-            data-cursor="SWITCH"
-            className={`px-2.5 py-1 rounded-lg transition-all font-semibold ${
-              dataSource === 'ESP32_WIFI'
-                ? 'bg-sky-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            Wi-Fi Direct
-          </button>
-          <button
-            onClick={() => onToggleDataSource('SUPABASE')}
-            data-cursor="SWITCH"
-            className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 font-semibold ${
-              dataSource === 'SUPABASE'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Database className="w-3 h-3" />
-            <span>Supabase</span>
-          </button>
-        </div>
-
-        {/* Live Status Badge */}
-        <div
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-xl border font-bold transition-all ${statusConfig.badgeClass}`}
-        >
-          {statusConfig.icon}
-          <span>{statusConfig.label}</span>
-          {/* Live telemetry signal indicator */}
-          <span
-            className={`w-1.5 h-1.5 rounded-full ${
-              status === 'LIVE'
-                ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] signal-live'
-                : status === 'CONNECTING'
-                ? 'bg-amber-500 animate-pulse'
-                : 'bg-slate-300'
-            }`}
-            title={`Telemetry signal: ${statusConfig.label}`}
-            aria-label={`Telemetry signal ${statusConfig.label.toLowerCase()}`}
-          />
-        </div>
-
-        {/* Last Timestamp */}
-        {lastUpdateTimestamp && (
-          <span className="hidden sm:inline text-slate-500 text-[11px] font-medium">
-            Sync: <span className="text-slate-800 font-semibold">{lastUpdateTimestamp}</span>
-          </span>
-        )}
-
-        {/* Demo Mode Button */}
+    <div className="relative flex flex-wrap items-center justify-end gap-2 text-xs">
+      {/* Data-source switcher */}
+      <div
+        className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100/90 p-0.5"
+        role="group"
+        aria-label="Telemetry data source"
+      >
         <button
-          onClick={() => onToggleDemoMode(!isDemoMode)}
-          data-cursor="TOGGLE"
-          className={`px-2.5 py-1 rounded-xl border text-[11px] font-mono font-semibold transition-all shadow-sm ${
-            isDemoMode
-              ? 'bg-amber-500 text-white border-amber-600'
-              : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+          type="button"
+          onClick={() => onToggleDataSource('ESP32_WIFI')}
+          data-cursor="SWITCH"
+          aria-pressed={dataSource === 'ESP32_WIFI'}
+          title="Poll the ESP32 directly over local Wi-Fi"
+          className={`px-3 py-1.5 rounded-full transition-all text-[11px] font-semibold flex items-center gap-1.5 ${
+            dataSource === 'ESP32_WIFI'
+              ? 'bg-white text-sky-700 shadow-sm border border-sky-200'
+              : 'text-slate-500 hover:text-slate-800 border border-transparent'
           }`}
-          title="Toggle Optional Simulated Demo Mode"
         >
-          {isDemoMode ? 'DEMO: ON' : 'DEMO: OFF'}
+          <Wifi className="w-3 h-3" aria-hidden="true" />
+          <span>Wi-Fi Direct</span>
         </button>
-
-        {/* Configuration Modal Trigger */}
         <button
-          onClick={() => setShowConfig(!showConfig)}
-          data-cursor="CONFIG"
-          className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 text-[11px] font-mono font-semibold shadow-sm transition-all"
+          type="button"
+          onClick={() => onToggleDataSource('SUPABASE')}
+          data-cursor="SWITCH"
+          aria-pressed={dataSource === 'SUPABASE'}
+          title="Stream telemetry from Supabase realtime"
+          className={`px-3 py-1.5 rounded-full transition-all text-[11px] font-semibold flex items-center gap-1.5 ${
+            dataSource === 'SUPABASE'
+              ? 'bg-white text-sky-700 shadow-sm border border-sky-200'
+              : 'text-slate-500 hover:text-slate-800 border border-transparent'
+          }`}
         >
-          <Settings2 className="w-3.5 h-3.5 text-slate-500" />
-          <span>Config</span>
+          <Cloud className="w-3 h-3" aria-hidden="true" />
+          <span>Supabase</span>
         </button>
       </div>
 
-      {/* Popover Settings Dialog */}
+      {/* Live status badge */}
+      <span
+        className={`ev-chip ${statusConfig.chipClass} py-1.5`}
+        title={statusDetails || `Telemetry link: ${statusConfig.label}`}
+        aria-live="polite"
+      >
+        {statusConfig.icon}
+        {statusConfig.label}
+        <span
+          className={`w-1.5 h-1.5 rounded-full ${
+            status === 'LIVE'
+              ? 'bg-emerald-500 signal-live'
+              : status === 'CONNECTING'
+              ? 'bg-amber-500 animate-pulse'
+              : 'bg-slate-300'
+          }`}
+          aria-hidden="true"
+        />
+      </span>
+
+      {/* Last synchronization time */}
+      {lastUpdateTimestamp && (
+        <span className="hidden md:inline text-[11px] font-mono text-slate-500">
+          Sync{' '}
+          <span className="text-slate-800 font-semibold tabular-nums">{lastUpdateTimestamp}</span>
+        </span>
+      )}
+
+      {/* Demo mode toggle */}
+      <button
+        type="button"
+        onClick={() => onToggleDemoMode(!isDemoMode)}
+        data-cursor="TOGGLE"
+        aria-pressed={isDemoMode}
+        title="Toggle explicitly simulated demo measurements"
+        className={`ev-chip py-1.5 cursor-pointer transition-colors ${
+          isDemoMode ? 'ev-chip-warn' : 'ev-chip-muted hover:border-slate-300'
+        }`}
+      >
+        {isDemoMode ? 'Demo On' : 'Demo Off'}
+      </button>
+
+      {/* Config trigger */}
+      <button
+        type="button"
+        onClick={() => setShowConfig(!showConfig)}
+        data-cursor="CONFIG"
+        aria-expanded={showConfig}
+        aria-haspopup="dialog"
+        className="ev-chip ev-chip-info py-1.5 cursor-pointer hover:bg-sky-50"
+      >
+        <Settings2 className="w-3 h-3" aria-hidden="true" />
+        Config
+      </button>
+
+      {/* Config dialog */}
       {showConfig && (
         <form
+          ref={panelRef}
           onSubmit={handleSave}
-          className="absolute right-0 top-11 mt-2 z-50 w-96 bg-white/95 border border-slate-200 p-5 rounded-2xl shadow-2xl backdrop-blur-xl font-mono text-xs text-slate-800"
+          role="dialog"
+          aria-label="Data ingestion settings"
+          className="absolute right-0 top-[calc(100%+10px)] z-50 w-[min(24rem,calc(100vw-2rem))] ev-panel p-5 shadow-pop font-mono text-xs text-slate-800"
         >
-          <div className="font-bold text-slate-900 text-sm pb-2 border-b border-slate-200 flex items-center justify-between">
-            <span>Data Ingestion Settings</span>
-            <span className="text-[10px] text-indigo-600 font-bold uppercase">Dual Transport</span>
+          <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+            <div>
+              <h2 className="text-sm font-sans font-bold text-slate-900">Data Ingestion Settings</h2>
+              <p className="text-[10px] text-sky-700 font-semibold uppercase tracking-wider mt-0.5">
+                Dual transport
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowConfig(false)}
+              aria-label="Close settings"
+              className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+            >
+              <X className="w-4 h-4" aria-hidden="true" />
+            </button>
           </div>
 
-          {/* Section 1: ESP32 Wi-Fi IP */}
-          <div className="mt-3">
-            <label className="text-[11px] text-slate-600 block mb-1 font-semibold">
-              1. Local ESP32 IP Address (Direct Wi-Fi):
+          {/* ESP32 Wi-Fi IP */}
+          <div className="mt-4">
+            <label htmlFor="cfg-esp32-url" className="text-[11px] text-slate-600 block mb-1.5 font-semibold">
+              1. Local ESP32 IP (direct Wi-Fi)
             </label>
             <input
+              id="cfg-esp32-url"
               type="text"
               value={tempUrl}
               onChange={(e) => setTempUrl(e.target.value)}
               placeholder="http://192.168.1.100"
-              className="w-full bg-slate-50 border border-slate-300 px-3 py-1.5 rounded-lg text-slate-900 focus:outline-none focus:border-indigo-500 focus:bg-white"
+              className="ev-input"
+              autoComplete="off"
+              spellCheck={false}
             />
           </div>
 
-          {/* Section 2: Supabase Credentials */}
-          <div className="mt-4 pt-3 border-t border-slate-200">
-            <label className="text-[11px] text-indigo-700 block mb-1 font-semibold flex items-center gap-1">
-              <Database className="w-3 h-3 text-indigo-600" />
-              <span>2. Supabase Project URL:</span>
+          {/* Supabase credentials */}
+          <div className="mt-4 pt-4 border-t border-slate-200">
+            <label htmlFor="cfg-sb-url" className="text-[11px] text-slate-600 block mb-1.5 font-semibold flex items-center gap-1.5">
+              <Database className="w-3 h-3 text-sky-600" aria-hidden="true" />
+              <span>2. Supabase project URL</span>
             </label>
             <input
+              id="cfg-sb-url"
               type="text"
               value={tempSbUrl}
               onChange={(e) => setTempSbUrl(e.target.value)}
               placeholder="https://xxxxxxxx.supabase.co"
-              className="w-full bg-slate-50 border border-slate-300 px-3 py-1.5 rounded-lg text-slate-900 focus:outline-none focus:border-indigo-500 focus:bg-white mb-2"
+              className="ev-input mb-2.5"
+              autoComplete="off"
+              spellCheck={false}
             />
 
-            <label className="text-[11px] text-indigo-700 block mb-1 font-semibold">
-              Supabase Anon / Public API Key:
+            <label htmlFor="cfg-sb-key" className="text-[11px] text-slate-600 block mb-1.5 font-semibold">
+              Supabase anon / public key
             </label>
             <input
+              id="cfg-sb-key"
               type="password"
               value={tempSbKey}
               onChange={(e) => setTempSbKey(e.target.value)}
               placeholder="eyJhbGciOiJIUzI1NiIsIn..."
-              className="w-full bg-slate-50 border border-slate-300 px-3 py-1.5 rounded-lg text-slate-900 focus:outline-none focus:border-indigo-500 focus:bg-white"
+              className="ev-input"
+              autoComplete="off"
             />
+            <p className="mt-2 text-[10px] text-slate-400 leading-relaxed">
+              Stored in this browser only (localStorage). Never hard-code credentials in the bundle.
+            </p>
           </div>
 
-          <div className="flex justify-between items-center mt-5 pt-3 border-t border-slate-200">
-            <span className="text-[10px] text-slate-400 font-medium">Live Realtime Sync</span>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setShowConfig(false)}
-                className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:text-slate-900 font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-sm"
-              >
-                Save & Connect
-              </button>
-            </div>
+          <div className="flex justify-end gap-2 mt-5 pt-4 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={() => setShowConfig(false)}
+              className="ev-btn ev-btn-ghost"
+            >
+              Cancel
+            </button>
+            <button type="submit" className="ev-btn ev-btn-primary">
+              Save &amp; Connect
+            </button>
           </div>
         </form>
       )}

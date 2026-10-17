@@ -99,13 +99,13 @@ export const CustomCursor: React.FC = () => {
           height: isHovered ? 78 : 34,
           backgroundColor: isHovered
             ? 'rgba(255, 255, 255, 0.72)'
-            : 'rgba(79, 70, 229, 0.05)',
+            : 'rgba(14, 165, 233, 0.06)',
           borderColor: isHovered
-            ? 'rgba(79, 70, 229, 0.45)'
-            : 'rgba(79, 70, 229, 0.28)',
+            ? 'rgba(2, 132, 199, 0.45)'
+            : 'rgba(2, 132, 199, 0.3)',
           boxShadow: isHovered
-            ? '0 16px 36px -6px rgba(79, 70, 229, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.8) inset'
-            : '0 4px 14px -2px rgba(79, 70, 229, 0.1)',
+            ? '0 16px 36px -6px rgba(2, 132, 199, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.8) inset'
+            : '0 4px 14px -2px rgba(2, 132, 199, 0.12)',
         }}
         transition={{
           type: 'spring',
@@ -119,12 +119,12 @@ export const CustomCursor: React.FC = () => {
             initial={{ opacity: 0, scale: 0.6 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.6 }}
-            className="text-[9px] font-mono font-bold tracking-widest uppercase text-indigo-700 select-none px-1"
+            className="text-[9px] font-mono font-bold tracking-widest uppercase text-sky-800 select-none px-1"
           >
             {cursorText}
           </motion.span>
         ) : (
-          <div className="w-1.5 h-1.5 rounded-full bg-indigo-600/70" />
+          <div className="w-1.5 h-1.5 rounded-full bg-sky-600/80" />
         )}
       </motion.div>
     </div>
