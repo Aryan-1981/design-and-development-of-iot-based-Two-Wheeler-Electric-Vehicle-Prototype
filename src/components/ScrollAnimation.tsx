@@ -1,6 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { motion, useScroll, useSpring } from 'framer-motion';
+import {
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+} from 'framer-motion';
 import { ChevronDown, ArrowDown, Cpu, Gauge, Zap, AlertTriangle, Layers } from 'lucide-react';
+import mitsCrest from '../assets/mits-crest.svg';
 
 interface ScrollAnimationProps {
   onEnterDashboard?: () => void;
@@ -28,6 +35,11 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({ onEnterDashboa
     damping: 30,
     restDelta: 0.001,
   });
+  const prefersReducedMotion = useReducedMotion();
+  const tiltX = useMotionValue(0);
+  const tiltY = useMotionValue(0);
+  const logoRotateX = useSpring(tiltX, { stiffness: 180, damping: 18, mass: 0.6 });
+  const logoRotateY = useSpring(tiltY, { stiffness: 180, damping: 18, mass: 0.6 });
 
   // 1. Fetch frames manifest
   useEffect(() => {
@@ -170,6 +182,21 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({ onEnterDashboa
 
   const progressPercent = frames.length > 0 ? Math.round((loadedCount / frames.length) * 100) : 0;
 
+  const handleLogoPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+    const maxTilt = 8;
+    tiltX.set((0.5 - y) * maxTilt);
+    tiltY.set((x - 0.5) * maxTilt);
+  };
+
+  const resetLogoTilt = () => {
+    tiltX.set(0);
+    tiltY.set(0);
+  };
+
   return (
     <div ref={containerRef} className="relative w-full h-[450vh] bg-[#080d1a]">
       {/* Sticky Fullscreen Viewport Window */}
@@ -206,6 +233,37 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({ onEnterDashboa
 
         {/* Foreground Hero Content Card */}
         <div className="relative z-30 max-w-4xl mx-auto px-6 text-center flex flex-col items-center">
+          <motion.div
+            data-cursor="MITS GWALIOR"
+            onPointerMove={handleLogoPointerMove}
+            onPointerLeave={resetLogoTilt}
+            style={{
+              rotateX: logoRotateX,
+              rotateY: logoRotateY,
+              transformPerspective: 700,
+              willChange: 'transform',
+              transformStyle: 'preserve-3d',
+              background: 'rgba(255, 255, 255, 0.85)',
+              border: '1px solid rgba(226, 232, 240, 0.9)',
+              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.06)',
+            }}
+            animate={prefersReducedMotion ? undefined : { y: [0, -6, 0] }}
+            transition={prefersReducedMotion ? undefined : { duration: 4, ease: 'easeInOut', repeat: Infinity }}
+            whileHover={{
+              scale: 1.1,
+              boxShadow:
+                '0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 0 25px rgba(79, 70, 229, 0.25)',
+            }}
+            className="mb-5 h-12 w-12 sm:h-16 sm:w-16 rounded-full backdrop-blur-[12px] flex items-center justify-center cursor-default"
+          >
+            <img
+              src={mitsCrest}
+              alt="Madhav Institute of Technology & Science (MITS) crest"
+              className="h-full w-full object-contain p-2 drop-shadow-[0_6px_10px_rgba(15,23,42,0.2)]"
+              draggable={false}
+            />
+          </motion.div>
+
           {/* Top Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/70 border border-cyan-500/30 text-cyan-300 text-xs font-mono uppercase tracking-wider backdrop-blur-md mb-6 shadow-glow-cyan/20">
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
