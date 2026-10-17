@@ -113,6 +113,18 @@ export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
         >
           {statusConfig.icon}
           <span>{statusConfig.label}</span>
+          {/* Live telemetry signal indicator */}
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${
+              status === 'LIVE'
+                ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] signal-live'
+                : status === 'CONNECTING'
+                ? 'bg-amber-500 animate-pulse'
+                : 'bg-slate-300'
+            }`}
+            title={`Telemetry signal: ${statusConfig.label}`}
+            aria-label={`Telemetry signal ${statusConfig.label.toLowerCase()}`}
+          />
         </div>
 
         {/* Last Timestamp */}

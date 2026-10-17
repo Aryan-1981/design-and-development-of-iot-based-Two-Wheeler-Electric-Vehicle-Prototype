@@ -78,7 +78,7 @@ export const SensorCard: React.FC<SensorCardProps> = ({
   return (
     <div
       data-cursor="INSPECT"
-      className={`group relative rounded-2xl glass-panel glass-panel-hover p-5 transition-all duration-300 ${currentTheme.border} ${currentTheme.glow}`}
+      className={`group relative rounded-2xl glass-panel glass-panel-hover card-glow p-5 transition-all duration-300 ${currentTheme.border} ${currentTheme.glow}`}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">

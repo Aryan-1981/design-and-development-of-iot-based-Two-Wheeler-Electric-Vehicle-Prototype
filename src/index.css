@@ -88,3 +88,92 @@
 .radar-ping {
   animation: radar-pulse 2s infinite ease-in-out;
 }
+
+/* ============================================================================
+   Animated Background — Layer keyframes (prefers-reduced-motion safe)
+   ============================================================================ */
+
+/* Ambient drift — very slow radial gradient movement */
+@keyframes ambient-drift {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(3%, -2%) scale(1.12);
+  }
+  100% {
+    transform: translate(-1%, 2%) scale(1);
+  }
+}
+
+/* Circuit board subtle breathe */
+@keyframes circuit-breathe {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.65; }
+}
+
+/* Edge energy wave breathe */
+@keyframes edge-breathe {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(1.02); }
+}
+
+/* Wave horizontal drift */
+@keyframes wave-drift {
+  0% { transform: translateX(-20%); }
+  100% { transform: translateX(20%); }
+}
+
+/* Particle floating drift */
+@keyframes particle-float {
+  0%, 100% {
+    transform: translate(0, 0);
+    opacity: 0.35;
+  }
+  25% {
+    transform: translate(12px, -18px);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(-8px, -28px);
+    opacity: 0.45;
+  }
+  75% {
+    transform: translate(6px, -12px);
+    opacity: 0.75;
+  }
+}
+
+/* Card hover glow */
+.card-glow {
+  transition: box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-glow:hover {
+  box-shadow: 0 20px 40px -10px rgba(14, 165, 233, 0.12),
+              0 0 0 1px rgba(14, 165, 233, 0.25) inset;
+}
+
+/* Live telemetry signal pulse dot */
+@keyframes signal-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.4); opacity: 0.3; }
+}
+
+.signal-live {
+  animation: signal-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Reduced motion fallback — kill all background animations */
+@media (prefers-reduced-motion: reduce) {
+  [data-animated-bg] *,
+  [data-animated-bg] {
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+  .signal-live {
+    animation: none !important;
+  }
+}

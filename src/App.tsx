@@ -13,6 +13,7 @@ import { LogsTab } from './pages/LogsTab';
 import { AboutProjectPage } from './pages/AboutProjectPage';
 import { CustomCursor } from './components/CustomCursor';
 import { MitsLogo } from './components/MitsLogo';
+import { AnimatedBackground } from './components/AnimatedBackground';
 import { useSensorData } from './hooks/useSensorData';
 import { Cpu } from 'lucide-react';
 
@@ -39,7 +40,10 @@ export function App() {
   } = useSensorData();
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans selection:bg-indigo-500/20 selection:text-indigo-900 bg-mesh-light">
+    <div className="min-h-screen text-slate-900 flex flex-col font-sans selection:bg-indigo-500/20 selection:text-indigo-900 overflow-x-hidden">
+      {/* Premium animated EV dashboard background — sits behind all content */}
+      <AnimatedBackground />
+
       {/* Interactive Glassmorphism Spring Physics Custom Cursor */}
       <CustomCursor />
 
