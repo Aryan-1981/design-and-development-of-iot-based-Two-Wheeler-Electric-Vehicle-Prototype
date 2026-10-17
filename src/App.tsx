@@ -58,8 +58,7 @@ export function App() {
               </div>
               <div>
                 <h1 className="text-sm sm:text-base lg:text-lg font-extrabold text-slate-900 tracking-tight leading-tight">
-                  Design and Development of IoT-Based Two-Wheeler Electric Vehicle Prototype for
-                  Performance Monitoring
+                  IoT-Based Performance Monitoring of Two-Wheeler Electric Vehicles
                 </h1>
                 <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2 font-medium">
                   <span className="text-indigo-700 font-mono font-semibold bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
@@ -158,7 +157,7 @@ export function App() {
         {/* Global Footer */}
         <footer className="mt-auto border-t border-slate-200/80 bg-white/90 backdrop-blur-md py-4 px-4 sm:px-8 text-center text-xs font-mono text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 shadow-sm">
           <div>
-            <span>Design and Development of IoT-Based Two-Wheeler Electric Vehicle Prototype</span>
+            <span>IoT-Based Performance Monitoring of Two-Wheeler Electric Vehicles</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-indigo-600 font-semibold">

@@ -21,8 +21,7 @@ export const AboutProjectPage: React.FC = () => {
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
-            Design and Development of IoT-Based Two-Wheeler Electric Vehicle Prototype for
-            Performance Monitoring
+            IoT-Based Performance Monitoring of Two-Wheeler Electric Vehicles
           </h2>
 
           <p className="mt-4 text-sm sm:text-base text-slate-600 leading-relaxed font-sans">

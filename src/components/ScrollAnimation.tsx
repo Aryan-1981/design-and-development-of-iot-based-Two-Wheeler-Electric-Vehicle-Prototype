@@ -216,8 +216,7 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({ onEnterDashboa
 
           {/* Full Mandatory Title */}
           <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-cyan-300 tracking-tight leading-tight drop-shadow-lg">
-            Design and Development of IoT-Based Two-Wheeler Electric Vehicle Prototype for
-            Performance Monitoring
+            IoT-Based Performance Monitoring of Two-Wheeler Electric Vehicles
           </h1>
 
           {/* Subtitle */}
