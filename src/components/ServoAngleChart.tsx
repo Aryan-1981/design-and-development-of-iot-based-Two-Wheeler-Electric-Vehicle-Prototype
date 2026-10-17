@@ -7,7 +7,6 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  Legend,
 } from 'recharts';
 import { Activity } from 'lucide-react';
 import { UnifiedTelemetry } from '../types/sensors';
@@ -18,16 +17,17 @@ interface ServoAngleChartProps {
   history: UnifiedTelemetry[];
 }
 
+/** Logical test range of the actuator sequence (degrees). */
+const SERVO_MAX_DEG = 60;
+
 export const ServoAngleChart: React.FC<ServoAngleChartProps> = ({ history }) => {
   const chartData = history.map((item) => ({
     time: item.timestamp,
     LogicalAngle: item.servo.commanded_angle_deg,
-    OutputAngle: item.servo.output_angle_deg,
   }));
 
   const latest = history[history.length - 1]?.servo;
   const logicalAngle = latest?.commanded_angle_deg ?? 0;
-  const outputAngle = latest?.output_angle_deg ?? 180;
   const hasData = history.length > 0;
 
   return (
@@ -35,7 +35,7 @@ export const ServoAngleChart: React.FC<ServoAngleChartProps> = ({ history }) => 
       icon={Activity}
       accent="warn"
       title="Servo Command Trend"
-      subtitle="Logical command vs. physical PWM target (180 − θ) over time — stepped actuator sequence"
+      subtitle={`Commanded logical angle over time (0–${SERVO_MAX_DEG}°) — stepped actuator sequence`}
       actions={
         hasData ? (
           <>
@@ -51,14 +51,6 @@ export const ServoAngleChart: React.FC<ServoAngleChartProps> = ({ history }) => 
                 Logical {logicalAngle}°
               </span>
             </span>
-            <span
-              className="ev-chip"
-              style={{ background: 'rgba(37,99,235,0.08)', borderColor: 'rgba(37,99,235,0.28)', color: '#1D4ED8' }}
-            >
-              <span className="ev-metric text-[11px] normal-case tracking-normal">
-                Physical {outputAngle}°
-              </span>
-            </span>
             <span className="text-[10px] font-mono text-slate-400 self-center">deg</span>
           </>
         ) : (
@@ -72,36 +64,19 @@ export const ServoAngleChart: React.FC<ServoAngleChartProps> = ({ history }) => 
         <LineChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
           <XAxis dataKey="time" {...CHART_AXIS_PROPS} />
-          <YAxis {...CHART_AXIS_PROPS} domain={[0, 185]} unit="°" width={44} />
+          <YAxis {...CHART_AXIS_PROPS} domain={[0, SERVO_MAX_DEG + 5]} unit="°" width={44} />
           <Tooltip
             contentStyle={CHART_TOOLTIP_STYLE}
-            formatter={(val, name) => [`${val}°`, String(name)]}
-          />
-          <Legend
-            wrapperStyle={{
-              fontSize: '11px',
-              fontFamily: 'JetBrains Mono, monospace',
-              paddingTop: '8px',
-            }}
+            formatter={(val) => [`${val}°`, 'Commanded Angle']}
           />
           <Line
             type="stepAfter"
             dataKey="LogicalAngle"
-            name="Logical (0–60°)"
+            name="Commanded Angle"
             stroke="#D97706"
             strokeWidth={2.25}
             dot={false}
             activeDot={{ r: 4, fill: '#D97706', stroke: '#fff', strokeWidth: 2 }}
-          />
-          <Line
-            type="stepAfter"
-            dataKey="OutputAngle"
-            name="Physical (180 − θ)"
-            stroke="#2563EB"
-            strokeWidth={2}
-            strokeDasharray="6 4"
-            dot={false}
-            activeDot={{ r: 4, fill: '#2563EB', stroke: '#fff', strokeWidth: 2 }}
           />
         </LineChart>
       </ResponsiveContainer>
