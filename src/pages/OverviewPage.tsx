@@ -5,6 +5,8 @@ import { TemperatureHumidityChart } from '../components/TemperatureHumidityChart
 import { AccelerometerChart } from '../components/AccelerometerChart';
 import { GyroscopeChart } from '../components/GyroscopeChart';
 import { MpuTempChart } from '../components/MpuTempChart';
+import { RpmChart } from '../components/RpmChart';
+import { ServoAngleChart } from '../components/ServoAngleChart';
 import { ElectricalMeters } from '../components/ElectricalMeters';
 import {
   Thermometer,
@@ -119,11 +121,20 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ telemetry, history }
       <ElectricalMeters electrical={electrical} />
 
       {/* Real-time Dynamic Charts Previews */}
+
+      {/* Row 1: RPM + Servo — above temperature charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RpmChart history={history} maxRpmSession={telemetry?.maxRpmSession ?? 0} />
+        <ServoAngleChart history={history} />
+      </div>
+
+      {/* Row 2: DHT11 Temperature + MPU6050 Die Temp */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <TemperatureHumidityChart history={history} />
         <MpuTempChart history={history} />
       </div>
 
+      {/* Row 3: Accelerometer + Gyroscope */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AccelerometerChart history={history} />
         <GyroscopeChart history={history} />
