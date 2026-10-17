@@ -2,12 +2,28 @@ import { useState, useEffect } from 'react';
 import { UnifiedTelemetry, HardwareStatus, SystemLogEntry } from '../types/sensors';
 import { esp32Provider } from '../services/esp32SensorProvider';
 import { supabaseProvider } from '../services/supabaseSensorProvider';
+import { defaultSupabaseUrl, defaultSupabaseAnonKey } from '../services/supabaseClient';
 
 const MAX_HISTORY_POINTS = 60;
 const MAX_LOG_ENTRIES = 80;
 
 export function useSensorData() {
-  const [dataSource, setDataSource] = useState<'ESP32_WIFI' | 'SUPABASE'>('ESP32_WIFI');
+  // Check if user previously saved a data source preference or if Supabase credentials exist
+  const getInitialDataSource = (): 'ESP32_WIFI' | 'SUPABASE' => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('ev_data_source');
+      if (saved === 'ESP32_WIFI' || saved === 'SUPABASE') {
+        return saved;
+      }
+    }
+    // Default to SUPABASE if Supabase URL is available or in production cloud deployment
+    if (defaultSupabaseUrl || (typeof window !== 'undefined' && window.location.hostname !== 'localhost')) {
+      return 'SUPABASE';
+    }
+    return 'ESP32_WIFI';
+  };
+
+  const [dataSource, setDataSourceState] = useState<'ESP32_WIFI' | 'SUPABASE'>(getInitialDataSource);
   const [telemetry, setTelemetry] = useState<UnifiedTelemetry | null>(null);
   const [history, setHistory] = useState<UnifiedTelemetry[]>([]);
   const [status, setStatus] = useState<HardwareStatus>('CONNECTING');
@@ -16,16 +32,20 @@ export function useSensorData() {
 
   // Configuration values
   const [esp32Url, setEsp32Url] = useState<string>(esp32Provider.getBaseUrl());
-  const [supabaseUrl, setSupabaseUrl] = useState<string>(
-    import.meta.env.VITE_SUPABASE_URL || ''
-  );
-  const [supabaseKey, setSupabaseKey] = useState<string>(
-    import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-  );
+  const [supabaseUrl, setSupabaseUrl] = useState<string>(defaultSupabaseUrl);
+  const [supabaseKey, setSupabaseKey] = useState<string>(defaultSupabaseAnonKey);
   const [isDemoMode, setIsDemoMode] = useState<boolean>(esp32Provider.isDemoMode());
+
+  const setDataSource = (source: 'ESP32_WIFI' | 'SUPABASE') => {
+    setDataSourceState(source);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('ev_data_source', source);
+    }
+  };
 
   useEffect(() => {
     let unsubTelemetry: () => void;
+    let unsubHistory: (() => void) | undefined;
     let unsubStatus: () => void;
     let unsubLog: () => void;
 
@@ -55,6 +75,12 @@ export function useSensorData() {
       esp32Provider.stop();
       supabaseProvider.start();
 
+      unsubHistory = supabaseProvider.onHistory((initialHistory) => {
+        if (initialHistory && initialHistory.length > 0) {
+          setHistory(initialHistory.slice(-MAX_HISTORY_POINTS));
+        }
+      });
+
       unsubTelemetry = supabaseProvider.onTelemetry((reading) => {
         setTelemetry(reading);
         setHistory((prev) => {
@@ -77,6 +103,7 @@ export function useSensorData() {
 
     return () => {
       if (unsubTelemetry) unsubTelemetry();
+      if (unsubHistory) unsubHistory();
       if (unsubStatus) unsubStatus();
       if (unsubLog) unsubLog();
     };
@@ -121,3 +148,4 @@ export function useSensorData() {
     clearLogs,
   };
 }
+
