@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="mitsTitle mitsDesc">
+  <title id="mitsTitle">Madhav Institute of Technology &amp; Science crest</title>
+  <desc id="mitsDesc">A stylized shield crest with MITS lettering for hero branding.</desc>
+  <defs>
+    <linearGradient id="shield" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#1d4ed8"/>
+      <stop offset="1" stop-color="#4338ca"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#fde68a"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="60" fill="#f8fafc"/>
+  <path d="M64 18 96 32v32c0 20-13 35-32 46C45 99 32 84 32 64V32z" fill="url(#shield)"/>
+  <path d="M64 28 88 38v26c0 15-9 26-24 36-15-10-24-21-24-36V38z" fill="none" stroke="#e2e8f0" stroke-width="2.5"/>
+  <path d="M46 48h36v8H46zm8 16h20v8H54z" fill="url(#accent)"/>
+  <text x="64" y="86" text-anchor="middle" font-size="19" font-family="Inter, Arial, sans-serif" font-weight="800" fill="#e2e8f0" letter-spacing="1.5">MITS</text>
+</svg>
