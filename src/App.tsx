@@ -40,7 +40,7 @@ export function App() {
   } = useSensorData();
 
   return (
-    <div className="min-h-screen text-slate-900 flex flex-col font-sans selection:bg-indigo-500/20 selection:text-indigo-900 overflow-x-hidden">
+    <div className="min-h-screen text-slate-900 flex flex-col font-sans selection:bg-indigo-500/20 selection:text-indigo-900">
       {/* Premium animated EV dashboard background — sits behind all content */}
       <AnimatedBackground />
 
