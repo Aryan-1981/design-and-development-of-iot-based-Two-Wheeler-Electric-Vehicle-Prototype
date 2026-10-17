@@ -8,7 +8,9 @@ import { MpuTempChart } from './components/MpuTempChart';
 import { AccelerometerChart } from './components/AccelerometerChart';
 import { GyroscopeChart } from './components/GyroscopeChart';
 import { RpmChart } from './components/RpmChart';
+import { RpmSampleTable } from './components/RpmSampleTable';
 import { ServoAngleChart } from './components/ServoAngleChart';
+import { ServoSampleTable } from './components/ServoSampleTable';
 import { ElectricalMeters } from './components/ElectricalMeters';
 import { LogsTab } from './pages/LogsTab';
 import { AboutProjectPage } from './pages/AboutProjectPage';
@@ -134,11 +136,17 @@ export function App() {
           )}
 
           {activeSection === 'rpm' && (
-            <RpmChart history={history} maxRpmSession={telemetry?.maxRpmSession ?? 0} />
+            <div className="space-y-5 sm:space-y-6">
+              <RpmChart history={history} maxRpmSession={telemetry?.maxRpmSession ?? 0} />
+              <RpmSampleTable history={history} />
+            </div>
           )}
 
           {activeSection === 'servo' && (
-            <ServoAngleChart history={history} />
+            <div className="space-y-5 sm:space-y-6">
+              <ServoAngleChart history={history} />
+              <ServoSampleTable history={history} />
+            </div>
           )}
 
           {activeSection === 'voltage-current' && (
