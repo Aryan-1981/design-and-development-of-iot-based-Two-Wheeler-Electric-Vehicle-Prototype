@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { motion, useScroll, useSpring } from 'framer-motion';
+import {
+  useScroll,
+  useSpring,
+} from 'framer-motion';
 import { ChevronDown, ArrowDown, Cpu, Gauge, Zap, AlertTriangle, Layers } from 'lucide-react';
 import { MitsLogo } from './MitsLogo';
 
